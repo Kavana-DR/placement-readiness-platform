@@ -137,22 +137,22 @@ function UpcomingAssessments(){
 
 export default function DashboardHome(){
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-6">Dashboard</h2>
+    <div className="p-8 bg-gray-50 min-h-screen">
+      <h2 className="text-3xl font-semibold mb-8">Dashboard</h2>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-8">
           <ReadinessCircle />
           <ContinuePractice />
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           <SkillRadar />
           <WeeklyGoals />
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-8">
         <UpcomingAssessments />
       </div>
     </div>
