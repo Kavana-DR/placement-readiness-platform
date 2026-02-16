@@ -1,26 +1,46 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Card from '../design-system/components/Card'
 import Button from '../design-system/components/Button'
-import { getEntryById, deleteEntry } from '../utils/historyManager'
+import { getEntryById, deleteEntry, updateEntry } from '../utils/historyManager'
+import { format7DayPlan, formatChecklist, formatQuestions, formatCompleteExport, copyToClipboard, downloadAsFile } from '../utils/exportUtils'
+import { Download, Copy, Trash2 } from 'lucide-react'
 
 export default function ResultsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [entry] = useState(() => id ? getEntryById(id) : null)
+  const [entry, setEntry] = useState(() => id ? getEntryById(id) : null)
   const [tab, setTab] = useState('overview')
+  const [skillConfidence, setSkillConfidence] = useState(() => entry?.skillConfidenceMap || {})
+  const [liveScore, setLiveScore] = useState(entry?.readinessScore || 0)
 
-  if (!entry) {
-    return (
-      <div className="p-6">
-        <div className="text-center text-gray-600">
-          <p>Analysis not found.</p>
-          <Button variant="primary" onClick={() => navigate('/analyze')} className="mt-4">
-            Create New Analysis
-          </Button>
-        </div>
-      </div>
-    )
+  // Calculate live score based on skill confidence
+  useEffect(() => {
+    if (!entry) return
+
+    let adjustedScore = entry.readinessScore
+    const allSkills = Object.values(entry.extractedSkills.categorized || {}).flat()
+
+    allSkills.forEach(skill => {
+      const confidence = skillConfidence[skill]
+      if (confidence === 'know') {
+        adjustedScore += 2
+      } else if (confidence === 'practice') {
+        adjustedScore -= 2
+      }
+    })
+
+    setLiveScore(Math.max(0, Math.min(100, adjustedScore)))
+  }, [skillConfidence, entry])
+
+  const handleSkillToggle = (skill, newConfidence) => {
+    const updated = { ...skillConfidence, [skill]: newConfidence }
+    setSkillConfidence(updated)
+
+    // Save to history
+    if (id) {
+      updateEntry(id, { skillConfidenceMap: updated })
+    }
   }
 
   const handleDelete = () => {
@@ -28,6 +48,19 @@ export default function ResultsPage() {
       deleteEntry(entry.id)
       navigate('/history')
     }
+  }
+
+  if (!entry) {
+    return (
+      <div className="p-8 bg-gray-50 min-h-screen">
+        <div className="text-center text-gray-600">
+          <p className="mb-4">Analysis not found.</p>
+          <Button variant="primary" onClick={() => navigate('/analyze')}>
+            Create New Analysis
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   const skillCategories = {
@@ -38,6 +71,12 @@ export default function ResultsPage() {
     cloudDevOps: 'Cloud/DevOps',
     testing: 'Testing'
   }
+
+  // Get weak skills (marked as "practice")
+  const weakSkills = Object.entries(skillConfidence)
+    .filter(([_, conf]) => conf === 'practice')
+    .map(([skill]) => skill)
+    .slice(0, 3)
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
@@ -52,16 +91,18 @@ export default function ResultsPage() {
             New Analysis
           </Button>
           <Button variant="secondary" onClick={handleDelete} className="bg-red-100 text-red-700">
-            Delete
+            <Trash2 size={16} className="mr-1" /> Delete
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      {/* Score Cards */}
+      <div className="grid grid-cols-4 gap-4 mb-8">
         <Card>
           <div className="text-center">
-            <div className="text-3xl font-bold text-primary">{entry.readinessScore}</div>
-            <div className="text-sm text-gray-600">Readiness Score</div>
+            <div className="text-3xl font-bold text-primary">{liveScore}</div>
+            <div className="text-sm text-gray-600">Live Score</div>
+            <div className="text-xs text-gray-500 mt-1">({entry.readinessScore} base)</div>
           </div>
         </Card>
         <Card>
@@ -102,29 +143,106 @@ export default function ResultsPage() {
 
       {/* Tab Content */}
       {tab === 'overview' && (
-        <div className="space-y-4">
+        <div className="space-y-4 max-w-6xl">
           <Card>
-            <h3 className="font-semibold mb-3">Extracted Skills</h3>
-            <div className="space-y-3">
+            <h3 className="font-semibold mb-4">Extracted Skills — Mark your confidence level</h3>
+            <p className="text-xs text-gray-500 mb-4">Hover over each skill to mark confidence. Your score updates in real-time.</p>
+            <div className="space-y-4">
               {Object.entries(entry.extractedSkills.categorized).map(([key, keywords]) => (
                 <div key={key}>
-                  <div className="font-medium text-sm text-primary">{skillCategories[key]}</div>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {keywords.map(kw => (
-                      <span key={kw} className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full">
-                        {kw}
-                      </span>
-                    ))}
+                  <div className="font-medium text-sm text-primary mb-2">{skillCategories[key]}</div>
+                  <div className="flex flex-wrap gap-3">
+                    {keywords.map(kw => {
+                      const confidence = skillConfidence[kw] || 'unknown'
+                      const isKnow = confidence === 'know'
+                      const isPractice = confidence === 'practice'
+
+                      return (
+                        <div
+                          key={kw}
+                          className="relative group"
+                        >
+                          <span
+                            className={`px-3 py-2 rounded-full text-xs font-medium cursor-pointer transition-all ${
+                              isKnow
+                                ? 'bg-green-200 text-green-800'
+                                : isPractice
+                                ? 'bg-amber-200 text-amber-800'
+                                : 'bg-indigo-100 text-indigo-700'
+                            }`}
+                          >
+                            {kw}
+                          </span>
+
+                          {/* Floating toggle menu */}
+                          <div className="hidden group-hover:block absolute bottom-full mb-2 bg-white border border-gray-200 rounded-md shadow-lg z-50 whitespace-nowrap">
+                            <button
+                              onClick={() => handleSkillToggle(kw, 'know')}
+                              className={`block w-full text-left px-3 py-2 text-sm hover:bg-green-50 ${isKnow ? 'bg-green-100 font-semibold' : ''}`}
+                            >
+                              ✓ I know this
+                            </button>
+                            <button
+                              onClick={() => handleSkillToggle(kw, 'practice')}
+                              className={`block w-full text-left px-3 py-2 text-sm hover:bg-amber-50 border-t ${isPractice ? 'bg-amber-100 font-semibold' : ''}`}
+                            >
+                              ⟳ Need practice
+                            </button>
+                            <button
+                              onClick={() => handleSkillToggle(kw, 'unknown')}
+                              className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 border-t ${confidence === 'unknown' ? 'bg-gray-100 font-semibold' : ''}`}
+                            >
+                              ? Unsure
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Export Buttons */}
+            <div className="mt-8 pt-6 border-t space-y-3">
+              <h4 className="font-medium text-sm mb-3">Export</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={() => copyToClipboard(format7DayPlan(entry.plan))}
+                >
+                  <Copy size={14} className="mr-1" /> Copy 7-Day Plan
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={() => copyToClipboard(formatChecklist(entry.checklist))}
+                >
+                  <Copy size={14} className="mr-1" /> Copy Checklist
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={() => copyToClipboard(formatQuestions(entry.questions))}
+                >
+                  <Copy size={14} className="mr-1" /> Copy Questions
+                </Button>
+                <Button
+                  variant="primary"
+                  size="small"
+                  onClick={() => downloadAsFile(formatCompleteExport(entry), `${entry.company}-analysis.txt`)}
+                >
+                  <Download size={14} className="mr-1" /> Download All
+                </Button>
+              </div>
             </div>
           </Card>
         </div>
       )}
 
       {tab === 'checklist' && (
-        <div className="space-y-4">
+        <div className="space-y-4 max-w-6xl">
           {entry.checklist.map(round => (
             <Card key={round.round}>
               <h3 className="font-semibold mb-2">Round {round.round}: {round.title}</h3>
@@ -142,7 +260,7 @@ export default function ResultsPage() {
       )}
 
       {tab === 'plan' && (
-        <div className="space-y-4">
+        <div className="space-y-4 max-w-6xl">
           {entry.plan.map(day => (
             <Card key={day.day}>
               <h3 className="font-semibold mb-1">Day {day.day}: {day.title}</h3>
@@ -160,7 +278,7 @@ export default function ResultsPage() {
       )}
 
       {tab === 'questions' && (
-        <div className="space-y-3">
+        <div className="space-y-3 max-w-6xl">
           {entry.questions.map((q, i) => (
             <Card key={i}>
               <div className="flex gap-3">
@@ -171,6 +289,30 @@ export default function ResultsPage() {
               </div>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Action Next */}
+      {weakSkills.length > 0 && (
+        <div className="mt-12 max-w-6xl">
+          <Card className="bg-blue-50 border border-blue-200">
+            <div>
+              <h3 className="font-semibold text-lg mb-3">📌 Next Action</h3>
+              <p className="text-sm text-gray-700 mb-4">
+                Focus on these weak areas first:
+              </p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {weakSkills.map(skill => (
+                  <span key={skill} className="px-3 py-1 bg-amber-200 text-amber-800 text-xs rounded-full font-medium">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+              <p className="text-base font-semibold text-primary">
+                💡 Start Day 1 plan now. Master fundamentals before diving into complex topics.
+              </p>
+            </div>
+          </Card>
         </div>
       )}
     </div>

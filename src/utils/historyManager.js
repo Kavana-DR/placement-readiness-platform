@@ -16,6 +16,7 @@ export function saveEntry(entry) {
     const newEntry = {
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
+      skillConfidenceMap: {}, // Initialize empty
       ...entry
     }
     history.unshift(newEntry) // newest first
@@ -33,6 +34,22 @@ export function getEntryById(id) {
     return history.find(e => e.id === id)
   } catch (e) {
     console.error('Error fetching entry:', e)
+    return null
+  }
+}
+
+export function updateEntry(id, updates) {
+  try {
+    const history = getHistory()
+    const index = history.findIndex(e => e.id === id)
+    if (index !== -1) {
+      history[index] = { ...history[index], ...updates }
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
+      return history[index]
+    }
+    return null
+  } catch (e) {
+    console.error('Error updating entry:', e)
     return null
   }
 }
