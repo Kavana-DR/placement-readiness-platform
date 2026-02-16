@@ -1,22 +1,30 @@
 import "./design-system/design-system.css";
+import React from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import LandingPage from './pages/LandingPage'
+import DashboardLayout from './layouts/DashboardLayout'
+import DashboardHome from './pages/dashboard/DashboardHome'
+import PracticePage from './pages/dashboard/PracticePage'
+import AssessmentsPage from './pages/dashboard/AssessmentsPage'
+import ResourcesPage from './pages/dashboard/ResourcesPage'
+import ProfilePage from './pages/dashboard/ProfilePage'
 
-import TopBar from "./design-system/layout/TopBar";
-import ContextHeader from "./design-system/layout/ContextHeader";
-import WorkspaceLayout from "./design-system/layout/WorkspaceLayout";
-import ProofFooter from "./design-system/layout/ProofFooter";
-
-function App() {
+function App(){
   return (
-    <div className="app-shell">
-      <TopBar />
-      <ContextHeader
-        title="Placement Readiness Platform"
-        subtitle="Build your preparation system with structure and clarity."
-      />
-      <WorkspaceLayout />
-      <ProofFooter />
-    </div>
-  );
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage/>} />
+        <Route path="/dashboard" element={<DashboardLayout/>}>
+          <Route index element={<DashboardHome/>} />
+          <Route path="practice" element={<PracticePage/>} />
+          <Route path="assessments" element={<AssessmentsPage/>} />
+          <Route path="resources" element={<ResourcesPage/>} />
+          <Route path="profile" element={<ProfilePage/>} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
-export default App;
+export default App
