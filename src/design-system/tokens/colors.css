@@ -1,0 +1,13 @@
+:root {
+  /* Core color tokens */
+  --kpb-bg: #F7F6F3; /* off-white */
+  --kpb-text: #111111; /* primary text */
+  --kpb-accent: #8B0000; /* deep red */
+  --kpb-success: #3B7A57; /* muted green */
+  --kpb-warning: #C18F1A; /* muted amber */
+
+  /* Shared dimensions */
+  --kpb-border-radius: 8px;
+  --kpb-transition-duration: 180ms;
+  --kpb-transition-ease: ease-in-out;
+}
