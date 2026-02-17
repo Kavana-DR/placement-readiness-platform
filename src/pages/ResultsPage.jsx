@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Card from '../design-system/components/Card'
 import Button from '../design-system/components/Button'
+import CompanyIntelCard from './CompanyIntelCard'
+import RoundMappingTimeline from './RoundMappingTimeline'
 import { getEntryById, deleteEntry, updateEntry } from '../utils/historyManager'
 import { format7DayPlan, formatChecklist, formatQuestions, formatCompleteExport, copyToClipboard, downloadAsFile } from '../utils/exportUtils'
 import { Download, Copy, Trash2 } from 'lucide-react'
@@ -127,13 +129,15 @@ export default function ResultsPage() {
 
       {/* Tabs */}
       <div className="flex gap-4 mb-6 border-b">
-        {['overview', 'checklist', 'plan', 'questions'].map(t => (
+        {['overview', 'intel', 'rounds', 'checklist', 'plan', 'questions'].map(t => (
           <button
             key={t}
             className={`px-4 py-2 font-medium text-sm ${tab === t ? 'border-b-2 border-primary text-primary' : 'text-gray-600'}`}
             onClick={() => setTab(t)}
           >
             {t === 'overview' && 'Skills'}
+            {t === 'intel' && '🏢 Company Intel'}
+            {t === 'rounds' && '📌 Interview Rounds'}
             {t === 'checklist' && 'Checklist'}
             {t === 'plan' && '7-Day Plan'}
             {t === 'questions' && 'Interview Qs'}
@@ -238,6 +242,18 @@ export default function ResultsPage() {
               </div>
             </div>
           </Card>
+        </div>
+      )}
+
+      {tab === 'intel' && (
+        <div className="max-w-6xl">
+          <CompanyIntelCard companyIntel={entry.companyIntel} />
+        </div>
+      )}
+
+      {tab === 'rounds' && (
+        <div className="max-w-6xl">
+          <RoundMappingTimeline rounds={entry.roundMapping} />
         </div>
       )}
 

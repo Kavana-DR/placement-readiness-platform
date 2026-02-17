@@ -5,6 +5,8 @@ import Button from '../../design-system/components/Button'
 import { extractSkills } from '../../utils/skillExtractor'
 import { calculateReadinessScore } from '../../utils/scoreCalculator'
 import { generateChecklist, generate7DayPlan, generateInterviewQuestions } from '../../utils/contentGenerator'
+import { getCompanyIntel } from '../../utils/companyIntel'
+import { generateRoundMapping } from '../../utils/roundMapping'
 import { saveEntry } from '../../utils/historyManager'
 
 export default function AnalyzePage() {
@@ -34,6 +36,10 @@ export default function AnalyzePage() {
     const analysis = { company, role, jdText, skills }
     const readinessScore = calculateReadinessScore(analysis)
 
+    // Generate company intel and round mapping
+    const companyIntel = getCompanyIntel(company)
+    const roundMapping = generateRoundMapping(companyIntel.size, skills.allCategories, jdText)
+
     // Save to history
     const entryId = saveEntry({
       company: company || 'Unknown Company',
@@ -43,7 +49,9 @@ export default function AnalyzePage() {
       checklist,
       plan,
       questions,
-      readinessScore
+      readinessScore,
+      companyIntel,
+      roundMapping
     })
 
     // Navigate to results
