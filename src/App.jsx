@@ -11,6 +11,8 @@ import ProfilePage from './pages/dashboard/ProfilePage'
 import AnalyzePage from './pages/dashboard/AnalyzePage'
 import ResultsPage from './pages/ResultsPage'
 import HistoryPage from './pages/HistoryPage'
+import TestChecklistPage from './pages/TestChecklistPage'
+import ShipPage from './pages/ShipPage'
 
 function App(){
   return (
@@ -32,6 +34,12 @@ function App(){
         </Route>
         <Route path="/results/:id" element={<DashboardLayout/>}>
           <Route index element={<ResultsPage/>} />
+        </Route>
+        <Route path="/prp/07-test" element={<DashboardLayout/>}>
+          <Route index element={<TestChecklistPage/>} />
+        </Route>
+        <Route path="/prp/08-ship" element={<DashboardLayout/>}>
+          <Route index element={<ShipPage/>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
