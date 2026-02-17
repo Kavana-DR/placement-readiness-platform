@@ -1,27 +1,70 @@
+import { normalizeEntry, validateEntrySchema, safeGetEntry } from './entrySchema'
+
 const HISTORY_KEY = 'placement_history'
+let loadError = null
+
+export function getLoadError() {
+  return loadError
+}
+
+export function clearLoadError() {
+  loadError = null
+}
 
 export function getHistory() {
   try {
     const data = localStorage.getItem(HISTORY_KEY)
-    return data ? JSON.parse(data) : []
+    if (!data) return []
+
+    const parsed = JSON.parse(data)
+    if (!Array.isArray(parsed)) return []
+
+    // Filter and normalize entries
+    const validEntries = parsed
+      .map(entry => safeGetEntry(entry))
+      .filter(entry => entry !== null)
+
+    // If some entries were corrupted, set notification
+    if (validEntries.length < parsed.length) {
+      loadError = `${parsed.length - validEntries.length} corrupted entry(ies) were skipped. Create a new analysis to continue.`
+    }
+
+    return validEntries
   } catch (e) {
     console.error('Error reading history:', e)
+    loadError = 'Error loading analysis history. Some data may be lost.'
     return []
   }
 }
 
 export function saveEntry(entry) {
   try {
+    if (!entry || typeof entry !== 'object') {
+      console.error('Invalid entry provided to saveEntry')
+      return null
+    }
+
     const history = getHistory()
     const newEntry = {
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
-      skillConfidenceMap: {}, // Initialize empty
+      updatedAt: new Date().toISOString(),
+      skillConfidenceMap: {},
+      baseScore: entry.baseScore || 0,
+      finalScore: entry.finalScore || entry.readinessScore || 0,
       ...entry
     }
-    history.unshift(newEntry) // newest first
+
+    // Normalize before saving
+    const normalized = normalizeEntry(newEntry)
+    if (!normalized) {
+      console.error('Failed to normalize entry before saving')
+      return null
+    }
+
+    history.unshift(normalized) // newest first
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
-    return newEntry.id
+    return normalized.id
   } catch (e) {
     console.error('Error saving entry:', e)
     return null
@@ -31,7 +74,8 @@ export function saveEntry(entry) {
 export function getEntryById(id) {
   try {
     const history = getHistory()
-    return history.find(e => e.id === id)
+    const entry = history.find(e => e.id === id)
+    return entry || null
   } catch (e) {
     console.error('Error fetching entry:', e)
     return null
@@ -42,12 +86,27 @@ export function updateEntry(id, updates) {
   try {
     const history = getHistory()
     const index = history.findIndex(e => e.id === id)
-    if (index !== -1) {
-      history[index] = { ...history[index], ...updates }
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
-      return history[index]
+    if (index === -1) {
+      console.error('Entry not found:', id)
+      return null
     }
-    return null
+
+    const updated = {
+      ...history[index],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    }
+
+    // Normalize before saving
+    const normalized = normalizeEntry(updated)
+    if (!normalized) {
+      console.error('Failed to normalize entry during update')
+      return null
+    }
+
+    history[index] = normalized
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
+    return normalized
   } catch (e) {
     console.error('Error updating entry:', e)
     return null
@@ -67,6 +126,7 @@ export function deleteEntry(id) {
 export function clearHistory() {
   try {
     localStorage.removeItem(HISTORY_KEY)
+    clearLoadError()
   } catch (e) {
     console.error('Error clearing history:', e)
   }

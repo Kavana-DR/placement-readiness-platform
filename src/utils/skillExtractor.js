@@ -7,6 +7,9 @@ const SKILL_KEYWORDS = {
   testing: { keywords: ['selenium', 'cypress', 'playwright', 'junit', 'pytest', 'jasmine', 'mocha', 'rspec', 'testng'] , name: 'Testing' },
 }
 
+// Default skills when no specific skills detected
+const DEFAULT_SKILLS = ['Communication', 'Problem solving', 'Basic coding', 'Projects']
+
 export function extractSkills(jdText) {
   const text = jdText.toLowerCase()
   const detected = {}
@@ -25,9 +28,22 @@ export function extractSkills(jdText) {
     }
   })
 
+  // If no skills detected, populate "other" with defaults
+  const isEmpty = allSkillsFound.length === 0
+  if (isEmpty) {
+    detected.other = DEFAULT_SKILLS
+  }
+
   return {
+    coreCS: detected.coreCS || [],
+    languages: detected.languages || [],
+    web: detected.web || [],
+    data: detected.data || [],
+    cloudDevOps: detected.cloudDevOps || [],
+    testing: detected.testing || [],
+    other: detected.other || [],
     categorized: detected,
     allCategories: allSkillsFound,
-    isEmpty: allSkillsFound.length === 0
+    isEmpty
   }
 }

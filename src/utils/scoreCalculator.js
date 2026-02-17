@@ -1,5 +1,11 @@
-export function calculateReadinessScore(analysis) {
-  let score = 35; // base
+/**
+ * Score Calculation
+ * baseScore: computed only on initial analysis
+ * finalScore: computed based on baseScore + skill confidence adjustments
+ */
+
+export function calculateBaseScore(analysis) {
+  let score = 35 // base
 
   // +5 per detected category (max 30)
   const categoryBonus = Math.min(analysis.skills.allCategories.length * 5, 30)
@@ -21,4 +27,28 @@ export function calculateReadinessScore(analysis) {
   }
 
   return Math.min(score, 100)
+}
+
+export function calculateFinalScore(baseScore, skillConfidenceMap) {
+  if (typeof baseScore !== 'number' || baseScore < 0 || baseScore > 100) {
+    return 0
+  }
+
+  let adjustedScore = baseScore
+
+  // Adjust based on skill confidence
+  Object.values(skillConfidenceMap || {}).forEach(confidence => {
+    if (confidence === 'know') {
+      adjustedScore += 2
+    } else if (confidence === 'practice') {
+      adjustedScore -= 2
+    }
+  })
+
+  return Math.max(0, Math.min(100, adjustedScore))
+}
+
+// Legacy function for backward compatibility
+export function calculateReadinessScore(analysis) {
+  return calculateBaseScore(analysis)
 }

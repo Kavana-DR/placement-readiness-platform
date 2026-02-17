@@ -5,6 +5,7 @@ import Button from '../design-system/components/Button'
 import CompanyIntelCard from './CompanyIntelCard'
 import RoundMappingTimeline from './RoundMappingTimeline'
 import { getEntryById, deleteEntry, updateEntry } from '../utils/historyManager'
+import { calculateFinalScore } from '../utils/scoreCalculator'
 import { format7DayPlan, formatChecklist, formatQuestions, formatCompleteExport, copyToClipboard, downloadAsFile } from '../utils/exportUtils'
 import { Download, Copy, Trash2 } from 'lucide-react'
 
@@ -14,34 +15,26 @@ export default function ResultsPage() {
   const [entry, setEntry] = useState(() => id ? getEntryById(id) : null)
   const [tab, setTab] = useState('overview')
   const [skillConfidence, setSkillConfidence] = useState(() => entry?.skillConfidenceMap || {})
-  const [liveScore, setLiveScore] = useState(entry?.readinessScore || 0)
+  const [finalScore, setFinalScore] = useState(entry?.finalScore || entry?.readinessScore || 0)
 
-  // Calculate live score based on skill confidence
+  // Calculate final score based on skill confidence
   useEffect(() => {
     if (!entry) return
 
-    let adjustedScore = entry.readinessScore
-    const allSkills = Object.values(entry.extractedSkills.categorized || {}).flat()
-
-    allSkills.forEach(skill => {
-      const confidence = skillConfidence[skill]
-      if (confidence === 'know') {
-        adjustedScore += 2
-      } else if (confidence === 'practice') {
-        adjustedScore -= 2
-      }
-    })
-
-    setLiveScore(Math.max(0, Math.min(100, adjustedScore)))
+    const baseScore = entry.baseScore || entry.readinessScore || 0
+    const newFinalScore = calculateFinalScore(baseScore, skillConfidence)
+    setFinalScore(newFinalScore)
   }, [skillConfidence, entry])
 
   const handleSkillToggle = (skill, newConfidence) => {
     const updated = { ...skillConfidence, [skill]: newConfidence }
     setSkillConfidence(updated)
 
-    // Save to history
+    // Save to history with updated finalScore
     if (id) {
-      updateEntry(id, { skillConfidenceMap: updated })
+      const baseScore = entry.baseScore || entry.readinessScore || 0
+      const newFinalScore = calculateFinalScore(baseScore, updated)
+      updateEntry(id, { skillConfidenceMap: updated, finalScore: newFinalScore })
     }
   }
 
@@ -102,14 +95,17 @@ export default function ResultsPage() {
       <div className="grid grid-cols-4 gap-4 mb-8">
         <Card>
           <div className="text-center">
-            <div className="text-3xl font-bold text-primary">{liveScore}</div>
-            <div className="text-sm text-gray-600">Live Score</div>
-            <div className="text-xs text-gray-500 mt-1">({entry.readinessScore} base)</div>
+            <div className="text-3xl font-bold text-primary">{finalScore}</div>
+            <div className="text-sm text-gray-600">Final Score</div>
+            <div className="text-xs text-gray-500 mt-1">({entry.baseScore || entry.readinessScore || 0} base)</div>
           </div>
         </Card>
         <Card>
           <div className="text-center">
-            <div className="text-2xl font-bold">{entry.extractedSkills.allCategories.length}</div>
+            <div className="text-2xl font-bold">
+              {Object.values(entry.extractedSkills || {})
+                .filter(arr => Array.isArray(arr) && arr.length > 0).length}
+            </div>
             <div className="text-sm text-gray-600">Skill Categories</div>
           </div>
         </Card>
@@ -152,11 +148,13 @@ export default function ResultsPage() {
             <h3 className="font-semibold mb-4">Extracted Skills — Mark your confidence level</h3>
             <p className="text-xs text-gray-500 mb-4">Hover over each skill to mark confidence. Your score updates in real-time.</p>
             <div className="space-y-4">
-              {Object.entries(entry.extractedSkills.categorized).map(([key, keywords]) => (
+              {Object.entries(skillCategories).map(([key, label]) => {
+                const keywords = entry.extractedSkills[key] || []
+                return (
                 <div key={key}>
-                  <div className="font-medium text-sm text-primary mb-2">{skillCategories[key]}</div>
+                  <div className="font-medium text-sm text-primary mb-2">{label}</div>
                   <div className="flex flex-wrap gap-3">
-                    {keywords.map(kw => {
+                    {keywords.filter(kw => kw).map(kw => {
                       const confidence = skillConfidence[kw] || 'unknown'
                       const isKnow = confidence === 'know'
                       const isPractice = confidence === 'practice'
@@ -204,7 +202,8 @@ export default function ResultsPage() {
                     })}
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
 
             {/* Export Buttons */}
