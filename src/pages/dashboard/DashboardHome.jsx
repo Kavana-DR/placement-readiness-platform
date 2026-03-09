@@ -2,7 +2,7 @@ import React from 'react'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts'
 import { useNavigate } from 'react-router-dom'
 import Card from '../../../src/design-system/components/Card'
-import RecommendedInternships from './RecommendedInternships'
+import JobRecommendations from '../../components/JobRecommendations'
 
 const readinessValue = 72
 
@@ -179,7 +179,7 @@ export default function DashboardHome(){
       </div>
 
       <div className="mt-8">
-        <RecommendedInternships />
+        <JobRecommendations />
       </div>
     </div>
   )

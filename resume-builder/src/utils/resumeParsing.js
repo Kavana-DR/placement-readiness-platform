@@ -1,8 +1,15 @@
 import * as mammoth from 'mammoth'
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
-GlobalWorkerOptions.workerSrc = pdfWorker
+// Prefer an explicit module worker in Vite to avoid fake-worker loading errors.
+try {
+  GlobalWorkerOptions.workerPort = new Worker(
+    new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url),
+    { type: 'module' },
+  )
+} catch {
+  GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
+}
 
 export const PARSED_RESUME_STORAGE_KEY = 'resumeBuilderParsedData'
 
@@ -288,7 +295,7 @@ export function parseResumeText(rawText = '') {
 
 async function extractTextFromPdf(file) {
   const buffer = await file.arrayBuffer()
-  const pdf = await getDocument({ data: buffer }).promise
+  const pdf = await getDocument({ data: buffer, disableWorker: true }).promise
   const pages = []
 
   for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
