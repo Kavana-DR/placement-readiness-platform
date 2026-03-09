@@ -1,0 +1,141 @@
+.template-selector {
+  background: #fff;
+  border: 1px solid #e6e2db;
+  border-radius: 6px;
+  padding: 14px;
+}
+
+.template-selector.compact {
+  padding: 12px;
+}
+
+.template-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.color-label {
+  margin-top: 12px;
+}
+
+.template-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.template-card {
+  border: 1px solid #d9d4cb;
+  background: #fff;
+  color: #222;
+  border-radius: 6px;
+  padding: 8px;
+  width: 120px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.template-card:hover {
+  border-color: #999;
+}
+
+.template-card.active {
+  border-color: #2b6be0;
+  box-shadow: 0 0 0 1px #2b6be0;
+}
+
+.template-name {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.template-thumb {
+  position: relative;
+  height: 82px;
+  border: 1px solid #d9d4cb;
+  background: #fff;
+  border-radius: 4px;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.template-check {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  color: #2b6be0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.thumb-line {
+  height: 4px;
+  background: #c7c7c7;
+  border-radius: 2px;
+  margin-bottom: 6px;
+}
+
+.thumb-line.short {
+  width: 72%;
+}
+
+.thumb-title {
+  width: 60%;
+}
+
+.thumb-rule {
+  height: 1px;
+  background: #c7c7c7;
+  margin: 5px 0;
+}
+
+.thumb-gap {
+  height: 8px;
+}
+
+.thumb-modern {
+  display: grid;
+  grid-template-columns: 34% 66%;
+  height: 100%;
+  gap: 6px;
+}
+
+.thumb-sidebar {
+  background: #c7c7c7;
+  border-radius: 2px;
+}
+
+.thumb-main {
+  padding-top: 2px;
+}
+
+.color-options {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.color-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #d9d4cb;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.color-dot:hover {
+  transform: scale(1.06);
+}
+
+.color-dot.active {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #2b6be0;
+}

@@ -1,0 +1,78 @@
+:root{
+  --bg: #0b1116;
+  --panel-bg: #0f1720;
+  --muted: #9aa6b2;
+  --accent: #0b67d0;
+  --card: #0f1724;
+  --side-bg: #ffffff;
+  --text-on-dark: #e6eef8;
+}
+
+.pn-root {
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  background: #F7F6F3; /* single off-white background per design system */
+  color: #222;
+  display: flex;
+  flex-direction: column;
+}
+
+.pn-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 24px 40px; /* use 40px outer padding desktop */
+  border-bottom: 1px solid #E6E2DB;
+  background: transparent;
+}
+.pn-left,.pn-center,.pn-right{ display:flex; align-items:center }
+.pn-center{ font-family: Georgia, 'Times New Roman', serif; font-weight:700 }
+
+.pn-content{
+  display:flex; /* 70/30 layout */
+  gap: 24px; /* spacing scale */
+  padding: 40px; /* outer padding */
+  box-sizing: border-box;
+  align-items: flex-start;
+}
+
+.pn-primary{
+  flex: 0 0 70%;
+  background: transparent;
+}
+.pn-secondary{
+  flex: 0 0 30%;
+  background: #fff;
+  border: 1px solid #E6E2DB;
+  border-radius: 8px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Primary workspace children spacing: use 24px between sections */
+.pn-primary > * + * { margin-top: 24px }
+
+.pn-section{ margin-bottom: 24px }
+.pn-panel h3{ margin:0 0 8px 0; font-family: Georgia, 'Times New Roman', serif }
+.pn-textarea{ width:100%; min-height:120px; padding:16px; border-radius:8px; border:1px solid #E6E2DB; font-family:inherit; box-sizing:border-box }
+
+.pn-actions{ display:flex; gap:16px; flex-wrap:wrap }
+.btn{ padding:8px 16px; border-radius:8px; border:1px solid #CFC9C0; background:transparent; cursor:pointer }
+.btn.primary{ background:#2b6cb0; color:#fff; border:none }
+
+.pn-footer{ padding:24px 40px; border-top: 1px solid #E6E2DB; font-size:14px; color:#6b6b6b }
+
+/* Typography: serif headings throughout */
+h1,h2,h3,h4,h5{ font-family: Georgia, 'Times New Roman', serif; color: #111 }
+
+/* Responsive: stack to single column on mobile, adjust padding to 24px */
+@media (max-width: 720px){
+  .pn-content{ flex-direction:column; padding: 24px }
+  .pn-primary{ flex: 1 1 auto }
+  .pn-secondary{ width: 100%; flex: 1 1 auto }
+  .pn-topbar{ padding: 16px 24px }
+  .pn-footer{ padding: 16px 24px }
+}
+
+/* helpers */
+.sr-only{ position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap }

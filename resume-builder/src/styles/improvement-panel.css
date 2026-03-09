@@ -1,0 +1,52 @@
+.improvement-panel {
+  background: #fff;
+  border: 1px solid #e6e2db;
+  border-radius: 6px;
+  padding: 18px 20px;
+  margin-top: -12px;
+  margin-bottom: 24px;
+}
+
+.improvement-title {
+  margin: 0 0 12px 0;
+  color: #222;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+}
+
+.improvement-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.improvement-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #555;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.improvement-number {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f3f2ee;
+  border: 1px solid #d9d4cb;
+  color: #444;
+  text-align: center;
+  line-height: 18px;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.improvement-empty {
+  margin: 0;
+  color: #666;
+  font-size: 13px;
+}

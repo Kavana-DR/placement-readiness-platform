@@ -1,0 +1,135 @@
+.score-card {
+  background: #fff;
+  border: 1px solid #e6e2db;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.score-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.score-ring {
+  --track: #ece9e2;
+  --fill: #c75a55;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--fill) calc(var(--score) * 1%), var(--track) 0);
+}
+
+.score-ring.getting-there {
+  --fill: #c98d1b;
+}
+
+.score-ring.strong-resume {
+  --fill: #2f8a48;
+}
+
+.score-ring-inner {
+  width: 102px;
+  height: 102px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 1px solid #ece9e2;
+}
+
+.score-number {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #222;
+  line-height: 1;
+}
+
+.score-max {
+  font-size: 13px;
+  color: #777;
+  margin-top: 4px;
+}
+
+.score-label {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #222;
+}
+
+.score-status {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.score-status.needs-work {
+  color: #b9413a;
+}
+
+.score-status.getting-there {
+  color: #aa6f00;
+}
+
+.score-status.strong-resume {
+  color: #2f8a48;
+}
+
+.suggestions {
+  border-top: 1px solid #e6e2db;
+  padding-top: 16px;
+}
+
+.suggestions-title {
+  margin: 0 0 10px 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  color: #222;
+}
+
+.suggestions-list {
+  list-style: disc;
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggestion-item {
+  color: #4f4f4f;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.suggestion-empty {
+  margin: 0;
+  font-size: 13px;
+  color: #4f4f4f;
+}
+
+@media (max-width: 768px) {
+  .score-ring {
+    width: 112px;
+    height: 112px;
+  }
+
+  .score-ring-inner {
+    width: 86px;
+    height: 86px;
+  }
+
+  .score-number {
+    font-size: 30px;
+  }
+}

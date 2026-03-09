@@ -1,0 +1,254 @@
+.proof-container {
+  min-height: calc(100vh - 70px);
+  background: #f7f6f3;
+  padding: 40px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.proof-header {
+  max-width: 1000px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.proof-header h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.5px;
+}
+
+.proof-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+.proof-status-badge {
+  margin: 16px auto 0;
+  width: fit-content;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid #d9d4cb;
+  background: #fff;
+}
+
+.proof-status-badge.progress {
+  color: #7b5a16;
+}
+
+.proof-status-badge.shipped {
+  color: #1f6f3c;
+  border-color: #b7d9c4;
+  background: #f4fbf6;
+}
+
+.proof-shipped-message {
+  margin: 10px 0 0 0;
+  font-size: 15px;
+  color: #2b5a3b;
+}
+
+.proof-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  gap: 16px;
+}
+
+.proof-card {
+  background: #fff;
+  border: 1px solid #e6e2db;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.proof-card h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 24px;
+  color: #222;
+}
+
+.proof-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.proof-card-head span {
+  font-size: 13px;
+  color: #6e6e6e;
+}
+
+.proof-helper-text {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  color: #5c5c5c;
+}
+
+.proof-step-list,
+.proof-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.proof-step-actions {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 10px 0;
+}
+
+.proof-step-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid #ece8e0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.proof-step-item.done {
+  background: #f4fbf6;
+  border-color: #d5eadc;
+}
+
+.proof-step-item.done .proof-step-right span {
+  color: #2e7c46;
+}
+
+.proof-step-item.missing .proof-step-right span {
+  color: #9f6f1e;
+}
+
+.proof-step-title {
+  flex: 1;
+}
+
+.proof-step-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.proof-step-toggle {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.proof-checklist-item label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #363636;
+}
+
+.proof-checklist-item input {
+  width: 16px;
+  height: 16px;
+  accent-color: #2b6cb0;
+}
+
+.proof-field {
+  margin-top: 12px;
+}
+
+.proof-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #444;
+}
+
+.proof-field input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d9d4cb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #222;
+  background: #fff;
+}
+
+.proof-field input:focus {
+  outline: 2px solid #d6e6fa;
+  border-color: #7ea6d7;
+}
+
+.proof-field-error {
+  margin: 6px 0 0 0;
+  font-size: 12px;
+  color: #b0443d;
+}
+
+.proof-actions {
+  margin-top: 16px;
+}
+
+.proof-btn {
+  border: 1px solid #cfc9c0;
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
+  font-size: 13px;
+  padding: 9px 14px;
+  cursor: pointer;
+}
+
+.proof-btn.primary {
+  background: #2b6cb0;
+  color: #fff;
+  border-color: #2b6cb0;
+}
+
+.proof-copy-status {
+  margin: 10px 0 0 0;
+  font-size: 13px;
+  color: #4d4d4d;
+}
+
+@media (max-width: 768px) {
+  .proof-container {
+    padding: 20px;
+  }
+
+  .proof-header h1 {
+    font-size: 28px;
+  }
+
+  .proof-card {
+    padding: 16px;
+  }
+
+  .proof-card h2 {
+    font-size: 20px;
+  }
+
+  .proof-step-item {
+    font-size: 13px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .proof-step-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .proof-checklist-item label {
+    align-items: flex-start;
+  }
+}
