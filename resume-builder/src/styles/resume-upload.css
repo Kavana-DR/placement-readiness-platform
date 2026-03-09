@@ -1,0 +1,86 @@
+.resume-upload-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.resume-upload-note {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.resume-upload-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.resume-upload-controls input[type='file'] {
+  min-width: 260px;
+}
+
+.resume-upload-error {
+  margin: 0;
+  font-size: 13px;
+  color: #9f1c1c;
+}
+
+.parsed-preview {
+  border-top: 1px solid #e6e2db;
+  padding-top: 14px;
+  display: grid;
+  gap: 14px;
+}
+
+.parsed-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.parsed-summary .label {
+  display: block;
+  font-size: 12px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 4px;
+}
+
+.parsed-summary p {
+  margin: 0;
+  font-size: 14px;
+  color: #222;
+}
+
+.parsed-section h4 {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: #222;
+}
+
+.parsed-section ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+
+.parsed-section li {
+  font-size: 13px;
+  color: #333;
+}
+
+.parsed-section .empty {
+  margin: 0;
+  font-size: 13px;
+  color: #777;
+}
+
+@media (max-width: 768px) {
+  .parsed-summary {
+    grid-template-columns: 1fr;
+  }
+}

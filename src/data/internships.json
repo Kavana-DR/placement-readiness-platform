@@ -1,0 +1,38 @@
+[
+  {
+    "id": "frontend-intern-startupx",
+    "title": "Frontend Developer Intern",
+    "company": "StartupX",
+    "skills": ["JavaScript", "React", "HTML", "CSS"]
+  },
+  {
+    "id": "backend-intern-techcorp",
+    "title": "Backend Developer Intern",
+    "company": "TechCorp",
+    "skills": ["Java", "Spring", "SQL"]
+  },
+  {
+    "id": "fullstack-intern-devlabs",
+    "title": "Full Stack Intern",
+    "company": "DevLabs",
+    "skills": ["React", "Node.js", "MongoDB"]
+  },
+  {
+    "id": "data-intern-analytica",
+    "title": "Data Analyst Intern",
+    "company": "Analytica",
+    "skills": ["SQL", "Python", "Excel"]
+  },
+  {
+    "id": "qa-intern-shipfast",
+    "title": "QA Automation Intern",
+    "company": "ShipFast",
+    "skills": ["Java", "Selenium", "Git"]
+  },
+  {
+    "id": "ml-intern-aimint",
+    "title": "Machine Learning Intern",
+    "company": "AIMint",
+    "skills": ["Python", "Pandas", "Scikit-learn"]
+  }
+]

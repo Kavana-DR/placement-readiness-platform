@@ -12,7 +12,7 @@ export default function Home() {
         <p className="home-subheadline">Craft your resume with AI precision, get real-time feedback, and boost your chances of landing an interview.</p>
         <button 
           className="btn-cta"
-          onClick={() => navigate('/builder')}
+          onClick={() => navigate('/resume-builder/builder')}
         >
           Start Building
         </button>

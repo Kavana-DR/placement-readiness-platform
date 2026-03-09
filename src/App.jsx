@@ -11,9 +11,16 @@ import ProfilePage from './pages/dashboard/ProfilePage'
 import AnalyzePage from './pages/dashboard/AnalyzePage'
 import ResultsPage from './pages/ResultsPage'
 import HistoryPage from './pages/HistoryPage'
+import ApplicationsPage from './pages/ApplicationsPage'
 import TestChecklistPage from './pages/TestChecklistPage'
 import ShipPage from './pages/ShipPage'
 import ProofPage from './pages/ProofPage'
+import ResumeBuilder from '../resume-builder/src/App'
+import ResumeBuilderHome from '../resume-builder/src/pages/Home'
+import ResumeBuilderBuilder from '../resume-builder/src/pages/Builder'
+import ResumeBuilderPreview from '../resume-builder/src/pages/Preview'
+import ResumeBuilderProof from '../resume-builder/src/pages/Proof'
+import '../resume-builder/src/index.css'
 
 function App(){
   return (
@@ -33,6 +40,9 @@ function App(){
         <Route path="/history" element={<DashboardLayout/>}>
           <Route index element={<HistoryPage/>} />
         </Route>
+        <Route path="/applications" element={<DashboardLayout/>}>
+          <Route index element={<ApplicationsPage/>} />
+        </Route>
         <Route path="/results/:id" element={<DashboardLayout/>}>
           <Route index element={<ResultsPage/>} />
         </Route>
@@ -44,6 +54,14 @@ function App(){
         </Route>
         <Route path="/prp/proof" element={<DashboardLayout/>}>
           <Route index element={<ProofPage/>} />
+        </Route>
+        <Route path="/resume-builder" element={<DashboardLayout/>}>
+          <Route element={<ResumeBuilder />}>
+            <Route index element={<ResumeBuilderHome />} />
+            <Route path="builder" element={<ResumeBuilderBuilder />} />
+            <Route path="preview" element={<ResumeBuilderPreview />} />
+            <Route path="proof" element={<ResumeBuilderProof />} />
+          </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

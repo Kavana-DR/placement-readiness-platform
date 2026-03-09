@@ -5,15 +5,17 @@ import '../styles/navigation.css'
 export default function Navigation() {
   const location = useLocation()
   const navigate = useNavigate()
-  const isHome = location.pathname === '/'
-  const isBuilder = location.pathname === '/builder'
-  const isPreview = location.pathname === '/preview'
-  const isProof = location.pathname === '/proof'
+  const basePath = '/resume-builder'
+  const normalizedPath = location.pathname.replace(/\/+$/, '') || '/'
+  const isHome = normalizedPath === basePath
+  const isBuilder = normalizedPath === `${basePath}/builder`
+  const isPreview = normalizedPath === `${basePath}/preview`
+  const isProof = normalizedPath === `${basePath}/proof`
 
   return (
     <nav className="app-navigation">
       <div className="nav-container">
-        <div className="nav-logo" onClick={() => navigate('/')}>
+        <div className="nav-logo" onClick={() => navigate(basePath)}>
           AI Resume Builder
         </div>
         
@@ -21,19 +23,19 @@ export default function Navigation() {
           <div className="nav-links">
             <button 
               className={`nav-link ${isBuilder ? 'active' : ''}`}
-              onClick={() => navigate('/builder')}
+              onClick={() => navigate(`${basePath}/builder`)}
             >
               Builder
             </button>
             <button 
               className={`nav-link ${isPreview ? 'active' : ''}`}
-              onClick={() => navigate('/preview')}
+              onClick={() => navigate(`${basePath}/preview`)}
             >
               Preview
             </button>
             <button 
               className={`nav-link ${isProof ? 'active' : ''}`}
-              onClick={() => navigate('/proof')}
+              onClick={() => navigate(`${basePath}/proof`)}
             >
               Proof
             </button>

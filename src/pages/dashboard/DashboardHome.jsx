@@ -1,6 +1,8 @@
 import React from 'react'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts'
+import { useNavigate } from 'react-router-dom'
 import Card from '../../../src/design-system/components/Card'
+import RecommendedInternships from './RecommendedInternships'
 
 const readinessValue = 72
 
@@ -136,6 +138,8 @@ function UpcomingAssessments(){
 }
 
 export default function DashboardHome(){
+  const navigate = useNavigate()
+
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <h2 className="text-3xl font-semibold mb-8">Dashboard</h2>
@@ -154,6 +158,28 @@ export default function DashboardHome(){
 
       <div className="mt-8">
         <UpcomingAssessments />
+      </div>
+
+      <div className="mt-8">
+        <Card>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-1">Build Resume</h3>
+              <p className="text-sm text-gray-600">Create and optimize your resume inside the platform.</p>
+            </div>
+            <button
+              type="button"
+              className="bg-primary text-white px-4 py-2 rounded-md"
+              onClick={() => navigate('/resume-builder')}
+            >
+              Open Module
+            </button>
+          </div>
+        </Card>
+      </div>
+
+      <div className="mt-8">
+        <RecommendedInternships />
       </div>
     </div>
   )

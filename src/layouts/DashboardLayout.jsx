@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { Home, Code, Video, BarChart2, User, Zap, Clock } from 'lucide-react'
+import { Home, Code, Video, BarChart2, User, Zap, Clock, Briefcase } from 'lucide-react'
 
 // eslint-disable-next-line no-unused-vars
 function NavItem({ to, icon: Icon, label }) {
@@ -22,6 +22,7 @@ export default function DashboardLayout(){
           <NavItem to="/dashboard" icon={Home} label="Dashboard" />
           <NavItem to="/analyze" icon={Zap} label="Analyze JD" />
           <NavItem to="/history" icon={Clock} label="History" />
+          <NavItem to="/applications" icon={Briefcase} label="Applications" />
           <div className="border-t my-4" />
           <NavItem to="/dashboard/practice" icon={Code} label="Practice" />
           <NavItem to="/dashboard/assessments" icon={BarChart2} label="Assessments" />

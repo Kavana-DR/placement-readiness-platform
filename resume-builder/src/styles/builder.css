@@ -37,6 +37,12 @@
   gap: 32px;
 }
 
+.builder-apply-status {
+  margin: -20px 0 0;
+  font-size: 13px;
+  color: #1f6b2d;
+}
+
 .form-section {
   background: #fff;
   padding: 28px;

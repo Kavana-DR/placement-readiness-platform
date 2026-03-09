@@ -5,10 +5,12 @@ import ScoreCard from '../components/ScoreCard'
 import TemplateSelector from '../components/TemplateSelector'
 import ImprovementPanel from '../components/ImprovementPanel'
 import BulletGuidance from '../components/BulletGuidance'
+import ResumeUploadPanel from '../components/ResumeUploadPanel'
 import { useResumeData } from '../hooks/useResumeData'
 import { calculateATSScore, generateSuggestions } from '../utils/atsScoring'
 import { getBulletSuggestions, getImprovementRecommendations } from '../utils/bulletGuidance'
 import { getStoredTemplate, getStoredThemeColor } from '../utils/templates'
+import { applyParsedDataToFormData, clearParsedResumeData, loadParsedResumeData } from '../utils/resumeParsing'
 
 const SKILL_CATEGORIES = [
   { key: 'technical', label: 'Technical Skills' },
@@ -62,7 +64,7 @@ function TagInput({ tags, inputValue, onInputChange, onAddTag, onRemoveTag, plac
 }
 
 export default function Builder() {
-  const { formData, setFormData, isLoaded } = useResumeData()
+  const { formData, setFormData, clearData, isLoaded } = useResumeData()
   const atsScore = React.useMemo(() => calculateATSScore(formData), [formData])
   const suggestions = React.useMemo(() => generateSuggestions(formData), [formData])
   const improvements = React.useMemo(() => getImprovementRecommendations(formData), [formData])
@@ -74,6 +76,8 @@ export default function Builder() {
   const [suggestSkillsLoading, setSuggestSkillsLoading] = React.useState(false)
   const [skillInputs, setSkillInputs] = React.useState({ technical: '', soft: '', tools: '' })
   const [projectStackInputs, setProjectStackInputs] = React.useState({})
+  const [parsedResumeData, setParsedResumeData] = React.useState(() => loadParsedResumeData())
+  const [applyParseStatus, setApplyParseStatus] = React.useState('')
 
   const handlePersonalInfoChange = (field, value) => {
     setFormData((prev) => ({
@@ -318,6 +322,29 @@ export default function Builder() {
     })
   }
 
+  const applyParsedDataToForm = () => {
+    if (!parsedResumeData) return
+    setFormData((prev) => applyParsedDataToFormData(prev, parsedResumeData))
+    setApplyParseStatus('Parsed resume data has been applied to the form.')
+    window.setTimeout(() => setApplyParseStatus(''), 2200)
+  }
+
+  const handleClearAllResumeData = () => {
+    setParsedResumeData(null)
+    setApplyParseStatus('')
+    setSkillInputs({ technical: '', soft: '', tools: '' })
+    setProjectStackInputs({})
+    setProjectOpenMap({})
+    setSkillsExpanded(true)
+    setProjectsExpanded(true)
+    clearParsedResumeData()
+    clearData()
+
+    // Clean up legacy or compatibility keys that may still hold parsed/form artifacts.
+    localStorage.removeItem('parsedResume')
+    localStorage.removeItem('resumeSkills')
+  }
+
   if (!isLoaded) {
     return (
       <div className="builder-container">
@@ -337,6 +364,14 @@ export default function Builder() {
 
       <div className="builder-layout">
         <div className="builder-form">
+          <ResumeUploadPanel
+            parsedData={parsedResumeData}
+            onParsedDataChange={setParsedResumeData}
+            onApplyToForm={applyParsedDataToForm}
+            onClearAll={handleClearAllResumeData}
+          />
+          {applyParseStatus && <p className="builder-apply-status">{applyParseStatus}</p>}
+
           <section className="form-section">
             <h2>Personal Information</h2>
             <div className="form-row">
