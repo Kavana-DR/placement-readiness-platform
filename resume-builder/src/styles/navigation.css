@@ -1,7 +1,7 @@
 /* Navigation Styles */
 .app-navigation {
-  background: #F7F6F3;
-  border-bottom: 1px solid #E6E2DB;
+  background: var(--kpb-surface, #F7F6F3);
+  border-bottom: 1px solid var(--kpb-border, #E6E2DB);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -22,7 +22,7 @@
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 18px;
   font-weight: 700;
-  color: #222;
+  color: var(--kpb-text, #222);
   cursor: pointer;
   transition: opacity 0.2s ease;
 }
@@ -41,7 +41,7 @@
   border: none;
   font-size: 14px;
   font-weight: 500;
-  color: #666;
+  color: var(--kpb-text-muted, #666);
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 4px 0;
@@ -49,12 +49,12 @@
 }
 
 .nav-link:hover {
-  color: #222;
+  color: var(--kpb-text, #222);
 }
 
 .nav-link.active {
-  color: #222;
-  border-bottom-color: #222;
+  color: var(--kpb-text, #222);
+  border-bottom-color: var(--kpb-accent, #4f46e5);
 }
 
 @media (max-width: 768px) {

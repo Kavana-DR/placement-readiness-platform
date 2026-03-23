@@ -1,9 +1,9 @@
 .score-card {
-  background: #fff;
-  border: 1px solid #e6e2db;
+  background: var(--kpb-surface, #fff);
+  border: 1px solid var(--kpb-border, #e6e2db);
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--kpb-shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.04));
 }
 
 .score-container {
@@ -15,7 +15,7 @@
 }
 
 .score-ring {
-  --track: #ece9e2;
+  --track: var(--kpb-track-bg, #ece9e2);
   --fill: #c75a55;
   width: 132px;
   height: 132px;
@@ -37,25 +37,25 @@
   width: 102px;
   height: 102px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--kpb-surface, #fff);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  border: 1px solid #ece9e2;
+  border: 1px solid var(--kpb-border, #ece9e2);
 }
 
 .score-number {
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 36px;
   font-weight: 700;
-  color: #222;
+  color: var(--kpb-text, #222);
   line-height: 1;
 }
 
 .score-max {
   font-size: 13px;
-  color: #777;
+  color: var(--kpb-text-muted, #777);
   margin-top: 4px;
 }
 
@@ -64,7 +64,7 @@
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 17px;
   font-weight: 700;
-  color: #222;
+  color: var(--kpb-text, #222);
 }
 
 .score-status {
@@ -86,7 +86,7 @@
 }
 
 .suggestions {
-  border-top: 1px solid #e6e2db;
+  border-top: 1px solid var(--kpb-border, #e6e2db);
   padding-top: 16px;
 }
 
@@ -94,7 +94,7 @@
   margin: 0 0 10px 0;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 15px;
-  color: #222;
+  color: var(--kpb-text, #222);
 }
 
 .suggestions-list {
@@ -107,7 +107,7 @@
 }
 
 .suggestion-item {
-  color: #4f4f4f;
+  color: var(--kpb-text-muted, #4f4f4f);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -115,7 +115,7 @@
 .suggestion-empty {
   margin: 0;
   font-size: 13px;
-  color: #4f4f4f;
+  color: var(--kpb-text-muted, #4f4f4f);
 }
 
 @media (max-width: 768px) {

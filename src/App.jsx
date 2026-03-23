@@ -19,7 +19,6 @@ import ResumeBuilder from '../resume-builder/src/App'
 import ResumeBuilderHome from '../resume-builder/src/pages/Home'
 import ResumeBuilderBuilder from '../resume-builder/src/pages/Builder'
 import ResumeBuilderPreview from '../resume-builder/src/pages/Preview'
-import ResumeBuilderProof from '../resume-builder/src/pages/Proof'
 import '../resume-builder/src/index.css'
 
 function App(){
@@ -60,7 +59,7 @@ function App(){
             <Route index element={<ResumeBuilderHome />} />
             <Route path="builder" element={<ResumeBuilderBuilder />} />
             <Route path="preview" element={<ResumeBuilderPreview />} />
-            <Route path="proof" element={<ResumeBuilderProof />} />
+            <Route path="proof" element={<Navigate to="/resume-builder/preview" replace />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

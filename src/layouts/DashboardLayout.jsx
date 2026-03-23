@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { Home, Code, Video, BarChart2, User, Zap, Clock, Briefcase } from 'lucide-react'
+import { Home, Code, Video, BarChart2, User, Zap, Clock, Briefcase, FileText } from 'lucide-react'
 import ThemeToggleButton from '../components/ThemeToggleButton'
 
 function NavItem({ to, icon, label }) {
@@ -24,6 +24,7 @@ export default function DashboardLayout() {
         <nav className="kpb-nav">
           <NavItem to="/dashboard" icon={Home} label="Dashboard" />
           <NavItem to="/analyze" icon={Zap} label="Analyze JD" />
+          <NavItem to="/resume-builder/builder" icon={FileText} label="Resume Builder" />
           <NavItem to="/history" icon={Clock} label="History" />
           <NavItem to="/applications" icon={Briefcase} label="Applications" />
           <div className="kpb-nav-divider" />

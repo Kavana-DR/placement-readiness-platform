@@ -10,7 +10,6 @@ export default function Navigation() {
   const isHome = normalizedPath === basePath
   const isBuilder = normalizedPath === `${basePath}/builder`
   const isPreview = normalizedPath === `${basePath}/preview`
-  const isProof = normalizedPath === `${basePath}/proof`
 
   return (
     <nav className="app-navigation">
@@ -32,12 +31,6 @@ export default function Navigation() {
               onClick={() => navigate(`${basePath}/preview`)}
             >
               Preview
-            </button>
-            <button 
-              className={`nav-link ${isProof ? 'active' : ''}`}
-              onClick={() => navigate(`${basePath}/proof`)}
-            >
-              Proof
             </button>
           </div>
         )}

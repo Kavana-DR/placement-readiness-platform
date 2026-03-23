@@ -1,7 +1,7 @@
 .template-selector {
-  background: #fff;
-  border: 1px solid #e6e2db;
-  border-radius: 6px;
+  background: var(--kpb-surface, #fff);
+  border: 1px solid var(--kpb-border, #e6e2db);
+  border-radius: var(--kpb-border-radius-sm, 8px);
   padding: 14px;
 }
 
@@ -13,7 +13,7 @@
   display: block;
   font-size: 12px;
   font-weight: 600;
-  color: #666;
+  color: var(--kpb-text-muted, #666);
   margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -30,9 +30,9 @@
 }
 
 .template-card {
-  border: 1px solid #d9d4cb;
-  background: #fff;
-  color: #222;
+  border: 1px solid var(--kpb-border, #d9d4cb);
+  background: var(--kpb-surface, #fff);
+  color: var(--kpb-text, #222);
   border-radius: 6px;
   padding: 8px;
   width: 120px;
@@ -42,12 +42,12 @@
 }
 
 .template-card:hover {
-  border-color: #999;
+  border-color: var(--kpb-accent, #4f46e5);
 }
 
 .template-card.active {
-  border-color: #2b6be0;
-  box-shadow: 0 0 0 1px #2b6be0;
+  border-color: var(--kpb-accent, #4f46e5);
+  box-shadow: 0 0 0 1px var(--kpb-accent, #4f46e5);
 }
 
 .template-name {
@@ -60,8 +60,8 @@
 .template-thumb {
   position: relative;
   height: 82px;
-  border: 1px solid #d9d4cb;
-  background: #fff;
+  border: 1px solid var(--kpb-border, #d9d4cb);
+  background: var(--kpb-surface, #fff);
   border-radius: 4px;
   padding: 8px;
   overflow: hidden;
@@ -71,7 +71,7 @@
   position: absolute;
   top: 4px;
   right: 6px;
-  color: #2b6be0;
+  color: var(--kpb-accent, #4f46e5);
   font-size: 12px;
   font-weight: 700;
 }
@@ -127,7 +127,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 1px solid #d9d4cb;
+  border: 1px solid var(--kpb-border, #d9d4cb);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
@@ -137,5 +137,5 @@
 }
 
 .color-dot.active {
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #2b6be0;
+  box-shadow: 0 0 0 2px var(--kpb-surface, #fff), 0 0 0 4px var(--kpb-accent, #4f46e5);
 }

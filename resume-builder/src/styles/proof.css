@@ -1,6 +1,6 @@
 .proof-container {
   min-height: calc(100vh - 70px);
-  background: #f7f6f3;
+  background: var(--kpb-bg, #f7f6f3);
   padding: 40px;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
 }
@@ -15,14 +15,14 @@
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 40px;
   font-weight: 700;
-  color: #222;
+  color: var(--kpb-text, #222);
   margin: 0 0 10px 0;
   letter-spacing: -0.5px;
 }
 
 .proof-subtitle {
   font-size: 16px;
-  color: #666;
+  color: var(--kpb-text-muted, #666);
   margin: 0;
 }
 
@@ -33,8 +33,8 @@
   border-radius: 999px;
   font-size: 13px;
   font-weight: 700;
-  border: 1px solid #d9d4cb;
-  background: #fff;
+  border: 1px solid var(--kpb-border, #d9d4cb);
+  background: var(--kpb-surface, #fff);
 }
 
 .proof-status-badge.progress {
@@ -61,8 +61,8 @@
 }
 
 .proof-card {
-  background: #fff;
-  border: 1px solid #e6e2db;
+  background: var(--kpb-surface, #fff);
+  border: 1px solid var(--kpb-border, #e6e2db);
   border-radius: 10px;
   padding: 20px;
 }
@@ -71,7 +71,7 @@
   margin: 0;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 24px;
-  color: #222;
+  color: var(--kpb-text, #222);
 }
 
 .proof-card-head {
@@ -84,13 +84,13 @@
 
 .proof-card-head span {
   font-size: 13px;
-  color: #6e6e6e;
+  color: var(--kpb-text-muted, #6e6e6e);
 }
 
 .proof-helper-text {
   margin: 0 0 12px 0;
   font-size: 13px;
-  color: #5c5c5c;
+  color: var(--kpb-text-muted, #5c5c5c);
 }
 
 .proof-step-list,
@@ -113,7 +113,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 14px;
-  border: 1px solid #ece8e0;
+  border: 1px solid var(--kpb-border, #ece8e0);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
@@ -152,7 +152,7 @@
   align-items: center;
   gap: 10px;
   font-size: 14px;
-  color: #363636;
+  color: var(--kpb-text, #363636);
 }
 
 .proof-checklist-item input {
@@ -169,18 +169,18 @@
   display: block;
   margin-bottom: 6px;
   font-size: 13px;
-  color: #444;
+  color: var(--kpb-text-muted, #444);
 }
 
 .proof-field input {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #d9d4cb;
+  border: 1px solid var(--kpb-border, #d9d4cb);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
-  color: #222;
-  background: #fff;
+  color: var(--kpb-text, #222);
+  background: var(--kpb-surface, #fff);
 }
 
 .proof-field input:focus {
@@ -199,25 +199,25 @@
 }
 
 .proof-btn {
-  border: 1px solid #cfc9c0;
+  border: 1px solid var(--kpb-border, #cfc9c0);
   border-radius: 8px;
-  background: #fff;
-  color: #222;
+  background: var(--kpb-surface, #fff);
+  color: var(--kpb-text, #222);
   font-size: 13px;
   padding: 9px 14px;
   cursor: pointer;
 }
 
 .proof-btn.primary {
-  background: #2b6cb0;
+  background: var(--kpb-accent, #4f46e5);
   color: #fff;
-  border-color: #2b6cb0;
+  border-color: var(--kpb-accent, #4f46e5);
 }
 
 .proof-copy-status {
   margin: 10px 0 0 0;
   font-size: 13px;
-  color: #4d4d4d;
+  color: var(--kpb-text-muted, #4d4d4d);
 }
 
 @media (max-width: 768px) {
