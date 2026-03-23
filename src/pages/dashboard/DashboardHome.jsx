@@ -1,142 +1,72 @@
 import React from 'react'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts'
 import { useNavigate } from 'react-router-dom'
-import Card from '../../../src/design-system/components/Card'
-import JobRecommendations from '../../components/JobRecommendations'
+import SectionCard from '../../design-system/components/SectionCard'
+import StatCard from '../../design-system/components/StatCard'
+import ProgressCard from '../../design-system/components/ProgressCard'
+import PageContainer from '../../design-system/layout/PageContainer'
+import PageHeader from '../../design-system/layout/PageHeader'
+import JobRecommendationsPanel from '../../components/JobRecommendationsPanel'
 import { useDashboardMetrics } from '../../hooks/useDashboardMetrics'
 
 function DashboardSkeleton() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-pulse">
-      <div className="space-y-8">
-        <div className="h-56 bg-white rounded-xl border border-gray-200" />
-        <div className="h-48 bg-white rounded-xl border border-gray-200" />
-      </div>
-      <div className="space-y-8">
-        <div className="h-56 bg-white rounded-xl border border-gray-200" />
-        <div className="h-48 bg-white rounded-xl border border-gray-200" />
-      </div>
+    <div className="kpb-grid-2" style={{ marginTop: 16 }}>
+      <div className="kpb-card" style={{ height: 220, opacity: 0.5 }} />
+      <div className="kpb-card" style={{ height: 220, opacity: 0.5 }} />
     </div>
   )
 }
 
-function ReadinessCircle({ value = 0, label = 'Readiness Score' }) {
+function ReadinessCircle({ value = 0 }) {
   const size = 180
   const stroke = 12
   const radius = (size - stroke) / 2
   const circumference = 2 * Math.PI * radius
   const normalized = Math.max(0, Math.min(100, value))
-  const dash = (normalized / 100) * circumference
+  const dashOffset = circumference * (1 - normalized / 100)
+
+  let scoreColor = '#dc2626'
+  if (normalized >= 70) scoreColor = '#16a34a'
+  else if (normalized >= 40) scoreColor = '#d97706'
 
   return (
-    <Card>
-      <div className="flex flex-col items-center">
-        <svg width={size} height={size} className="mb-4">
-          <g transform={`translate(${size / 2}, ${size / 2})`}>
-            <circle r={radius} stroke="#eee" strokeWidth={stroke} fill="none" />
-            <circle
-              r={radius}
-              stroke="#6366F1"
-              strokeWidth={stroke}
-              strokeLinecap="round"
-              fill="none"
-              strokeDasharray={`${dash} ${circumference - dash}`}
-              style={{ transition: 'stroke-dasharray 800ms ease-in-out', transform: 'rotate(-90deg)', transformOrigin: 'center' }}
-            />
-          </g>
-        </svg>
-        <div className="text-3xl font-semibold transition-all duration-500">{normalized}</div>
-        <div className="text-sm text-gray-600">{label}</div>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 8, position: 'relative' }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <g transform={`translate(${size / 2}, ${size / 2})`}>
+          <circle r={radius} stroke="#e2e8f0" strokeWidth={stroke} fill="none" />
+          <circle
+            r={radius}
+            stroke={scoreColor}
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            fill="none"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+            transform="rotate(-90)"
+            style={{ transition: 'stroke-dashoffset 700ms ease, stroke 400ms ease' }}
+          />
+        </g>
+      </svg>
+      <div style={{ position: 'absolute', textAlign: 'center' }}>
+        <div className="kpb-stat-value" style={{ fontSize: 30 }}>{normalized}</div>
+        <div className="kpb-text-muted">Readiness</div>
       </div>
-    </Card>
+    </div>
   )
 }
 
 function SkillRadar({ data }) {
   return (
-    <Card>
-      <div style={{ height: 260 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart data={data} cx="50%" cy="50%" outerRadius="80%">
-            <PolarGrid />
-            <PolarAngleAxis dataKey="subject" />
-            <PolarRadiusAxis angle={30} domain={[0, 100]} />
-            <Radar name="Current" dataKey="score" stroke="#6366F1" fill="#6366F1" fillOpacity={0.6} />
-          </RadarChart>
-        </ResponsiveContainer>
-      </div>
-    </Card>
-  )
-}
-
-function ContinuePractice({ completed, total, pct, lastTopic, onContinue }) {
-  return (
-    <Card>
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Continue Practice</h3>
-        <div className="text-sm text-gray-600 mb-2">Last topic: {lastTopic || 'Not started'}</div>
-        <div className="w-full bg-gray-200 rounded-full h-3 mb-3 overflow-hidden">
-          <div className="bg-primary h-3 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">{completed}/{total} completed</div>
-          <button type="button" className="bg-primary text-white px-3 py-1 rounded-md" onClick={onContinue}>
-            Continue
-          </button>
-        </div>
-      </div>
-    </Card>
-  )
-}
-
-function WeeklyGoals({ solved, target, pct, days }) {
-  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
-  return (
-    <Card>
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Weekly Goals</h3>
-        <div className="text-sm text-gray-600 mb-2">Problems Solved: {solved}/{target} this week</div>
-        <div className="w-full bg-gray-200 rounded-full h-3 mb-4 overflow-hidden">
-          <div className="bg-primary h-3 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
-        </div>
-
-        <div className="flex items-center gap-3 flex-wrap">
-          {dayLabels.map((d, i) => (
-            <div
-              key={d}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-500 ${days[i] ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}
-            >
-              {d.slice(0, 1)}
-            </div>
-          ))}
-        </div>
-      </div>
-    </Card>
-  )
-}
-
-function DashboardStats({ atsScore, extractedSkillsCount, applicationsCount }) {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <Card>
-        <div className="text-center">
-          <p className="text-xs text-gray-500">ATS Score</p>
-          <p className="text-2xl font-semibold transition-all duration-500">{atsScore}</p>
-        </div>
-      </Card>
-      <Card>
-        <div className="text-center">
-          <p className="text-xs text-gray-500">Extracted Skills</p>
-          <p className="text-2xl font-semibold transition-all duration-500">{extractedSkillsCount}</p>
-        </div>
-      </Card>
-      <Card>
-        <div className="text-center">
-          <p className="text-xs text-gray-500">Applications</p>
-          <p className="text-2xl font-semibold transition-all duration-500">{applicationsCount}</p>
-        </div>
-      </Card>
+    <div style={{ height: 280 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RadarChart data={data} cx="50%" cy="50%" outerRadius="80%">
+          <PolarGrid />
+          <PolarAngleAxis dataKey="subject" />
+          <PolarRadiusAxis angle={30} domain={[0, 100]} />
+          <Radar name="Current" dataKey="score" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.35} />
+        </RadarChart>
+      </ResponsiveContainer>
     </div>
   )
 }
@@ -157,80 +87,70 @@ export default function DashboardHome() {
     error,
   } = useDashboardMetrics()
 
-  const formattedUpdatedAt = React.useMemo(() => {
+  const updatedLabel = React.useMemo(() => {
     if (!lastUpdatedAt) return 'Not available'
     return new Date(lastUpdatedAt).toLocaleString()
   }, [lastUpdatedAt])
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-semibold">Dashboard</h2>
-        <div className="text-sm text-gray-500">Last updated: {formattedUpdatedAt}</div>
+    <PageContainer>
+      <PageHeader title="Dashboard" subtitle="Track readiness, practice momentum, and opportunities in one place." right={<span className="kpb-text-muted">Last updated: {updatedLabel}</span>} />
+
+      {error ? (
+        <SectionCard>
+          <span style={{ color: '#b91c1c', fontSize: 13 }}>Unable to load some dashboard metrics. Showing latest available values.</span>
+        </SectionCard>
+      ) : null}
+
+      <div className="kpb-grid-stats" style={{ marginBottom: 16 }}>
+        <StatCard label="ATS Score" value={atsScore || 0} subtext="Resume quality signal" />
+        <StatCard label="Skills" value={extractedSkillsCount || 0} subtext="Extracted from resume" />
+        <StatCard label="Applications" value={applicationsCount || 0} subtext="Submitted jobs/internships" />
+        <StatCard label="Practice" value={`${practice.completed || 0}/${practice.total || 10}`} subtext="Completed modules" />
       </div>
 
-      {error && (
-        <Card>
-          <div className="text-sm text-red-700">Unable to load some dashboard data. Showing last known values.</div>
-        </Card>
-      )}
+      {isLoading ? <DashboardSkeleton /> : (
+        <>
+          <div className="kpb-grid-2" style={{ marginBottom: 16 }}>
+            <SectionCard title="Readiness Score" right={<span className="kpb-badge">Live</span>}>
+              <div style={{ position: 'relative', minHeight: 200 }}>
+                <ReadinessCircle value={readinessScore || 0} />
+              </div>
+            </SectionCard>
 
-      <div className="mb-6">
-        <DashboardStats
-          atsScore={atsScore || 0}
-          extractedSkillsCount={extractedSkillsCount || 0}
-          applicationsCount={applicationsCount || 0}
-        />
-      </div>
-
-      {isLoading ? (
-        <DashboardSkeleton />
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-8">
-            <ReadinessCircle value={readinessScore || 0} />
-            <ContinuePractice
-              completed={practice.completed || 0}
-              total={practice.total || 10}
-              pct={practicePercent || 0}
-              lastTopic={practice.lastTopic || 'Not started'}
-              onContinue={() => navigate('/dashboard/practice')}
-            />
+            <SectionCard title="Skills Radar">
+              <SkillRadar data={skillRadarData || []} />
+            </SectionCard>
           </div>
 
-          <div className="space-y-8">
-            <SkillRadar data={skillRadarData || []} />
-            <WeeklyGoals
-              solved={practice.weeklySolved || 0}
-              target={practice.weeklyTarget || 20}
-              pct={weeklyGoalPercent || 0}
-              days={practice.activity || [false, false, false, false, false, false, false]}
-            />
-          </div>
-        </div>
-      )}
-
-      <div className="mt-8">
-        <Card>
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-1">Build Resume</h3>
-              <p className="text-sm text-gray-600">Create and optimize your resume inside the platform.</p>
-            </div>
-            <button
-              type="button"
-              className="bg-primary text-white px-4 py-2 rounded-md"
-              onClick={() => navigate('/resume-builder/builder')}
+          <div className="kpb-grid-2" style={{ marginBottom: 16 }}>
+            <ProgressCard
+              title="Continue Practice"
+              valueLabel={`Last topic: ${practice.lastTopic || 'Not started'}`}
+              percent={practicePercent || 0}
+              right={<button className="kpb-btn kpb-btn-primary kpb-btn-small" onClick={() => navigate('/dashboard/practice')}>Continue</button>}
             >
-              Open Module
-            </button>
-          </div>
-        </Card>
-      </div>
+              <div className="kpb-text-muted">{practice.completed || 0}/{practice.total || 10} completed</div>
+            </ProgressCard>
 
-      <div className="mt-8">
-        <JobRecommendations />
-      </div>
-    </div>
+            <ProgressCard
+              title="Weekly Goals"
+              valueLabel={`Solved: ${practice.weeklySolved || 0}/${practice.weeklyTarget || 20}`}
+              percent={weeklyGoalPercent || 0}
+            >
+              <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                {(practice.activity || [false, false, false, false, false, false, false]).map((day, idx) => (
+                  <span key={idx} className={`kpb-badge ${day ? '' : ''}`} style={{ background: day ? '#4f46e5' : '#e2e8f0', color: day ? '#fff' : '#64748b' }}>{['M', 'T', 'W', 'T', 'F', 'S', 'S'][idx]}</span>
+                ))}
+              </div>
+            </ProgressCard>
+          </div>
+        </>
+      )}
+
+      <SectionCard title="Job Recommendations">
+        <JobRecommendationsPanel title="" withCard={false} />
+      </SectionCard>
+    </PageContainer>
   )
 }

@@ -1,5 +1,9 @@
 import React from 'react'
-import Card from '../../design-system/components/Card'
+import Button from '../../design-system/components/Button'
+import SectionCard from '../../design-system/components/SectionCard'
+import StatCard from '../../design-system/components/StatCard'
+import PageContainer from '../../design-system/layout/PageContainer'
+import PageHeader from '../../design-system/layout/PageHeader'
 import {
   completePracticeTopic,
   getPracticeProgress,
@@ -45,15 +49,26 @@ export default function PracticePage() {
   const pct = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h2 className="text-2xl font-semibold mb-4">Practice</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <div className="space-y-4">
+    <PageContainer>
+      <PageHeader
+        title="Practice"
+        subtitle="Track topic completion, update weekly goals, and keep your readiness momentum."
+      />
+
+      <div className="kpb-grid-stats" style={{ marginBottom: 16 }}>
+        <StatCard label="Completed" value={progress.completed} />
+        <StatCard label="Target" value={progress.total} />
+        <StatCard label="Weekly Solved" value={progress.weeklySolved} />
+        <StatCard label="Progress %" value={Math.min(100, pct)} />
+      </div>
+
+      <div className="kpb-grid-2">
+        <SectionCard title="Practice Tracker">
+          <div style={{ display: 'grid', gap: 16 }}>
             <div>
-              <label className="block text-sm font-medium mb-2">Current Topic</label>
+              <label className="kpb-text-muted" style={{ display: 'block', marginBottom: 6 }}>Current Topic</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="kpb-input"
                 value={topic}
                 onChange={(event) => setTopic(event.target.value)}
               >
@@ -64,9 +79,9 @@ export default function PracticePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Practice Target</label>
+              <label className="kpb-text-muted" style={{ display: 'block', marginBottom: 6 }}>Practice Target</label>
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="kpb-input"
                 type="number"
                 min={1}
                 value={progress.total}
@@ -74,34 +89,29 @@ export default function PracticePage() {
               />
             </div>
 
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-              <div className="bg-primary h-3 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, pct)}%` }} />
+            <div className="kpb-progress-track">
+              <div className="kpb-progress-fill" style={{ width: `${Math.min(100, pct)}%` }} />
             </div>
 
-            <div className="text-sm text-gray-600">
+            <div className="kpb-text-muted">
               {progress.completed}/{progress.total} completed ({Math.min(100, pct)}%)
             </div>
 
-            <div className="flex gap-3">
-              <button type="button" className="bg-primary text-white px-4 py-2 rounded-md" onClick={handleComplete}>
-                Mark Topic Complete
-              </button>
-              <button type="button" className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md" onClick={handleReset}>
-                Reset Progress
-              </button>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <Button variant="primary" onClick={handleComplete}>Mark Topic Complete</Button>
+              <Button variant="secondary" onClick={handleReset}>Reset Progress</Button>
             </div>
           </div>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Current Snapshot</h3>
-            <p className="text-sm text-gray-700">Last Topic: {progress.lastTopic || 'Not started'}</p>
-            <p className="text-sm text-gray-700">Weekly Solved: {progress.weeklySolved}/{progress.weeklyTarget}</p>
-            <p className="text-sm text-gray-500">Last Updated: {progress.updatedAt ? new Date(progress.updatedAt).toLocaleString() : 'Not available'}</p>
+        <SectionCard title="Current Snapshot">
+          <div style={{ display: 'grid', gap: 8 }}>
+            <div className="kpb-kv-item"><span className="kpb-kv-label">Last Topic: </span>{progress.lastTopic || 'Not started'}</div>
+            <div className="kpb-kv-item"><span className="kpb-kv-label">Weekly Solved: </span>{progress.weeklySolved}/{progress.weeklyTarget}</div>
+            <div className="kpb-kv-item"><span className="kpb-kv-label">Last Updated: </span>{progress.updatedAt ? new Date(progress.updatedAt).toLocaleString() : 'Not available'}</div>
           </div>
-        </Card>
+        </SectionCard>
       </div>
-    </div>
+    </PageContainer>
   )
 }

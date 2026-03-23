@@ -2,6 +2,7 @@ import { dispatchAppDataUpdated } from './appEvents'
 
 export const PARSED_RESUME_STORAGE_KEY = 'resumeBuilderParsedData'
 export const INTERNSHIP_APPLICATIONS_STORAGE_KEY = 'internshipApplications'
+export const SAVED_JOBS_STORAGE_KEY = 'savedJobs'
 
 function normalizeSkill(skill = '') {
   return skill.toLowerCase().trim()
@@ -61,8 +62,13 @@ export function getStoredApplications(storage = localStorage) {
 
   return parsed
     .map((entry) => ({
+      id: entry.id || '',
       jobTitle: entry.jobTitle || entry.title || '',
       company: entry.company || '',
+      type: entry.type || '',
+      workMode: entry.workMode || '',
+      location: entry.location || '',
+      applyLink: entry.applyLink || '',
       dateApplied: entry.dateApplied || entry.appliedAt || '',
     }))
     .filter((entry) => entry.jobTitle && entry.company)
@@ -80,11 +86,49 @@ export function saveInternshipApplication(job, storage = localStorage) {
     {
       jobTitle: job.title,
       company: job.company,
+      type: job.type || '',
+      workMode: job.workMode || '',
+      location: job.location || '',
+      applyLink: job.applyLink || '',
       dateApplied: new Date().toISOString(),
     },
   ]
 
   storage.setItem(INTERNSHIP_APPLICATIONS_STORAGE_KEY, JSON.stringify(next))
   dispatchAppDataUpdated({ scope: 'applications', key: INTERNSHIP_APPLICATIONS_STORAGE_KEY, action: 'save' })
+  return next
+}
+
+export function getSavedJobs(storage = localStorage) {
+  const parsed = safeJsonParse(storage.getItem(SAVED_JOBS_STORAGE_KEY), [])
+  if (!Array.isArray(parsed)) return []
+  return parsed
+    .map((entry) => ({
+      id: entry.id || '',
+      title: entry.title || entry.jobTitle || '',
+      company: entry.company || '',
+      dateSaved: entry.dateSaved || entry.savedAt || '',
+    }))
+    .filter((entry) => entry.title && entry.company)
+}
+
+export function toggleSavedJob(job, storage = localStorage) {
+  const saved = getSavedJobs(storage)
+  const exists = saved.some((entry) => entry.title === job.title && entry.company === job.company)
+
+  const next = exists
+    ? saved.filter((entry) => !(entry.title === job.title && entry.company === job.company))
+    : [
+        ...saved,
+        {
+          id: job.id || '',
+          title: job.title,
+          company: job.company,
+          dateSaved: new Date().toISOString(),
+        },
+      ]
+
+  storage.setItem(SAVED_JOBS_STORAGE_KEY, JSON.stringify(next))
+  dispatchAppDataUpdated({ scope: 'saved-jobs', key: SAVED_JOBS_STORAGE_KEY, action: exists ? 'delete' : 'save' })
   return next
 }

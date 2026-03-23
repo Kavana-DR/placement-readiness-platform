@@ -1,19 +1,22 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import Card from '../design-system/components/Card'
-import Button from '../design-system/components/Button'
-import { getHistory, deleteEntry, clearHistory, getLoadError } from '../utils/historyManager'
 import { AlertCircle } from 'lucide-react'
+import Button from '../design-system/components/Button'
+import SectionCard from '../design-system/components/SectionCard'
+import StatCard from '../design-system/components/StatCard'
+import PageContainer from '../design-system/layout/PageContainer'
+import PageHeader from '../design-system/layout/PageHeader'
+import { getHistory, deleteEntry, clearHistory, getLoadError } from '../utils/historyManager'
 
 export default function HistoryPage() {
-  const [history, setHistory] = useState(() => getHistory())
+  const [history, setHistory] = React.useState(() => getHistory())
   const loadError = getLoadError()
   const navigate = useNavigate()
 
   const handleDelete = (id) => {
     if (window.confirm('Delete this entry?')) {
       deleteEntry(id)
-      setHistory(history.filter(e => e.id !== id))
+      setHistory((prev) => prev.filter((entry) => entry.id !== id))
     }
   }
 
@@ -25,78 +28,68 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between mb-8 max-w-5xl">
-        <h2 className="text-3xl font-semibold">Analysis History</h2>
-        {history.length > 0 && (
-          <Button variant="secondary" onClick={handleClear} className="bg-red-100 text-red-700">
-            Clear All
-          </Button>
-        )}
+    <PageContainer>
+      <PageHeader
+        title="Analysis History"
+        subtitle="Review, revisit, and manage your previous JD analyses."
+        right={history.length > 0 ? <Button variant="danger" onClick={handleClear}>Clear All</Button> : null}
+      />
+
+      <div className="kpb-grid-stats" style={{ marginBottom: 16 }}>
+        <StatCard label="Total Analyses" value={history.length} />
+        <StatCard label="Latest Score" value={history[0]?.finalScore || history[0]?.readinessScore || 0} />
+        <StatCard label="Best Score" value={history.reduce((max, entry) => Math.max(max, entry.finalScore || entry.readinessScore || 0), 0)} />
+        <StatCard label="Load Status" value={loadError ? 'Warning' : 'Healthy'} />
       </div>
 
-      {/* Load Error Alert */}
-      {loadError && (
-        <Card className="mb-6 bg-amber-50 border border-amber-200">
-          <div className="flex gap-3">
-            <AlertCircle size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-amber-900 mb-1">Data Loading Issue</h3>
-              <p className="text-sm text-amber-800">{loadError}</p>
+      {loadError ? (
+        <div style={{ marginBottom: 16 }}>
+          <SectionCard>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <AlertCircle size={18} style={{ color: '#d97706', marginTop: 2, flexShrink: 0 }} />
+              <div>
+                <h3 className="kpb-card-title" style={{ marginBottom: 4 }}>Data Loading Issue</h3>
+                <p className="kpb-text-muted" style={{ margin: 0 }}>{loadError}</p>
+              </div>
             </div>
-          </div>
-        </Card>
-      )}
+          </SectionCard>
+        </div>
+      ) : null}
 
       {history.length === 0 ? (
-        <Card>
-          <div className="text-center py-8 text-gray-600">
-            <p>No analyses yet.</p>
-            <Button variant="primary" onClick={() => navigate('/analyze')} className="mt-4">
-              Create Your First Analysis
-            </Button>
+        <SectionCard>
+          <div className="kpb-empty-state">
+            <p style={{ marginTop: 0, marginBottom: 10 }}>No analyses yet.</p>
+            <Button variant="primary" onClick={() => navigate('/analyze')}>Create Your First Analysis</Button>
           </div>
-        </Card>
+        </SectionCard>
       ) : (
-        <div className="space-y-3">
-          {history.map(entry => (
-            <Card key={entry.id}>
-              <div className="flex items-center justify-between">
-                <div className="flex-1 cursor-pointer" onClick={() => navigate(`/results/${entry.id}`)}>
-                  <h3 className="font-semibold">{entry.company || 'Unknown Company'}</h3>
-                  <p className="text-sm text-gray-600">{entry.role || 'Unknown Role'}</p>
-                  <p className="text-xs text-gray-500">{new Date(entry.createdAt).toLocaleDateString()}</p>
+        <div style={{ display: 'grid', gap: 12 }}>
+          {history.map((entry) => (
+            <SectionCard key={entry.id}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => navigate(`/results/${entry.id}`)} role="button" tabIndex={0}>
+                  <h3 className="kpb-card-title" style={{ marginBottom: 4 }}>{entry.company || 'Unknown Company'}</h3>
+                  <p className="kpb-text-muted" style={{ margin: 0 }}>{entry.role || 'Unknown Role'}</p>
+                  <p className="kpb-text-muted" style={{ marginTop: 4 }}>{new Date(entry.createdAt).toLocaleDateString()}</p>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">{entry.finalScore || entry.readinessScore || 0}</div>
-                    <div className="text-xs text-gray-600">Score</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div className="kpb-stat-value" style={{ fontSize: 24 }}>{entry.finalScore || entry.readinessScore || 0}</div>
+                    <div className="kpb-text-muted">Score</div>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button
-                      variant="primary"
-                      size="small"
-                      onClick={() => navigate(`/results/${entry.id}`)}
-                    >
-                      View
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleDelete(entry.id)}
-                      className="bg-red-100 text-red-700"
-                    >
-                      Delete
-                    </Button>
+                  <div style={{ display: 'grid', gap: 8 }}>
+                    <Button variant="primary" size="small" onClick={() => navigate(`/results/${entry.id}`)}>View</Button>
+                    <Button variant="danger" size="small" onClick={() => handleDelete(entry.id)}>Delete</Button>
                   </div>
                 </div>
               </div>
-            </Card>
+            </SectionCard>
           ))}
         </div>
       )}
-    </div>
+    </PageContainer>
   )
 }

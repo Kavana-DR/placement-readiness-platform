@@ -1,56 +1,96 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import Button from '../design-system/components/Button'
+import Card from '../design-system/components/Card'
+import ThemeToggleButton from '../components/ThemeToggleButton'
+
+const FEATURES = [
+  {
+    title: 'Practice Problems',
+    description: 'A curated set of coding tracks to build problem-solving speed and confidence.',
+  },
+  {
+    title: 'Mock Assessments',
+    description: 'Track test status, score, and weak topics with readiness contribution insights.',
+  },
+  {
+    title: 'Progress Analytics',
+    description: 'See ATS score, readiness trend, and recommendations in one clean dashboard.',
+  },
+]
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="px-8 py-6">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="text-lg font-semibold">Placement Readiness</div>
-          <nav className="space-x-4">
-            <Link to="/" className="text-sm text-primary">Home</Link>
-            <Link to="/dashboard" className="text-sm text-primary">Dashboard</Link>
-          </nav>
+    <div className="kpb-page" style={{ minHeight: '100vh' }}>
+      <header style={{ borderBottom: '1px solid var(--kpb-border)', background: 'var(--kpb-surface)' }}>
+        <div className="kpb-page-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 20, paddingBottom: 20 }}>
+          <div className="kpb-brand">Placement Prep</div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <ThemeToggleButton />
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <Button variant="ghost">Home</Button>
+            </Link>
+            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+              <Button variant="primary">Open Dashboard</Button>
+            </Link>
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 flex items-center">
-        <div className="max-w-6xl mx-auto px-8 w-full">
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      <main>
+        <section className="kpb-page-container" style={{ paddingTop: 48, paddingBottom: 24 }}>
+          <div className="kpb-grid-2" style={{ alignItems: 'center' }}>
             <div>
-              <h1 className="text-4xl font-serif font-bold mb-4">Ace Your Placement</h1>
-              <p className="text-lg text-gray-700 mb-6">Practice, assess, and prepare for your dream job</p>
-              <Link to="/dashboard" className="inline-block bg-primary text-white px-6 py-3 rounded-md font-semibold">Get Started</Link>
+              <h1 className="kpb-page-title" style={{ marginBottom: 12 }}>Placement readiness, built like a real SaaS product</h1>
+              <p className="kpb-page-subtitle" style={{ maxWidth: 620, marginBottom: 18 }}>
+                Parse resume, track assessments, manage applications, and improve interview readiness with a consistent workflow.
+              </p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+                  <Button variant="primary">Get Started</Button>
+                </Link>
+                <Link to="/analyze" style={{ textDecoration: 'none' }}>
+                  <Button variant="secondary">Analyze JD</Button>
+                </Link>
+              </div>
             </div>
-            <div className="hidden md:block">
-              <div className="h-56 bg-white rounded-lg border border-gray-100"></div>
-            </div>
-          </section>
 
-          <section className="mt-12">
-            <h2 className="text-2xl font-semibold mb-6">Features</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-md border">
-                <div className="text-2xl mb-2">💻</div>
-                <h3 className="font-semibold">Practice Problems</h3>
-                <p className="text-sm text-gray-600">A curated set of coding problems to sharpen your skills.</p>
+            <Card>
+              <div style={{ display: 'grid', gap: 10 }}>
+                <div className="kpb-kv-item"><span className="kpb-kv-label">ATS Score:</span> 82</div>
+                <div className="kpb-kv-item"><span className="kpb-kv-label">Readiness:</span> 74</div>
+                <div className="kpb-kv-item"><span className="kpb-kv-label">Assessments Completed:</span> 6/10</div>
+                <div className="kpb-progress-track" style={{ marginTop: 6 }}>
+                  <div className="kpb-progress-fill" style={{ width: '74%' }} />
+                </div>
+                <p className="kpb-text-muted" style={{ margin: 0 }}>Live progress preview from your dashboard metrics.</p>
               </div>
-              <div className="bg-white p-6 rounded-md border">
-                <div className="text-2xl mb-2">🎥</div>
-                <h3 className="font-semibold">Mock Interviews</h3>
-                <p className="text-sm text-gray-600">Live and recorded mock interviews with feedback.</p>
-              </div>
-              <div className="bg-white p-6 rounded-md border">
-                <div className="text-2xl mb-2">📊</div>
-                <h3 className="font-semibold">Track Progress</h3>
-                <p className="text-sm text-gray-600">Monitor your improvement over time with simple analytics.</p>
-              </div>
-            </div>
-          </section>
+            </Card>
+          </div>
+        </section>
 
-          <footer className="mt-12 py-8 text-center text-sm text-gray-600">© {new Date().getFullYear()} Placement Readiness Platform</footer>
-        </div>
+        <section className="kpb-page-container" style={{ paddingTop: 8, paddingBottom: 40 }}>
+          <div style={{ marginBottom: 12 }}>
+            <h2 className="kpb-card-title" style={{ fontSize: '20px' }}>Core Features</h2>
+          </div>
+          <div className="kpb-grid-3">
+            {FEATURES.map((feature) => (
+              <Card key={feature.title}>
+                <h3 className="kpb-card-title" style={{ marginBottom: 8 }}>{feature.title}</h3>
+                <p className="kpb-text-muted" style={{ fontSize: 14 }}>{feature.description}</p>
+              </Card>
+            ))}
+          </div>
+        </section>
       </main>
+
+      <footer style={{ borderTop: '1px solid var(--kpb-border)', background: 'var(--kpb-surface)' }}>
+        <div className="kpb-page-container" style={{ paddingTop: 16, paddingBottom: 16 }}>
+          <p className="kpb-text-muted" style={{ margin: 0, textAlign: 'center' }}>
+            Copyright {new Date().getFullYear()} Placement Readiness Platform
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }

@@ -1,8 +1,12 @@
 :root {
-  /* Typography tokens */
-  --kpb-font-heading: Georgia, 'Times New Roman', serif;
-  --kpb-font-body: -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --kpb-font-size-base: 16px;
-  --kpb-line-height: 1.7;
+  --kpb-font-heading: 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif;
+  --kpb-font-body: 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif;
+  --kpb-font-size-page-title: 32px;
+  --kpb-font-size-section-title: 20px;
+  --kpb-font-size-card-title: 16px;
+  --kpb-font-size-body: 14px;
+  --kpb-font-size-muted: 12px;
+  --kpb-font-size-base: var(--kpb-font-size-body);
+  --kpb-line-height: 1.5;
   --kpb-max-text-width: 720px;
 }
