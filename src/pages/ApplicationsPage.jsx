@@ -1,6 +1,7 @@
 import React from 'react'
 import Card from '../design-system/components/Card'
 import { getStoredApplications } from '../utils/internshipRecommendations'
+import { APP_DATA_UPDATED_EVENT } from '../utils/appEvents'
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = React.useState(() => getStoredApplications())
@@ -8,7 +9,11 @@ export default function ApplicationsPage() {
   React.useEffect(() => {
     const syncFromStorage = () => setApplications(getStoredApplications())
     window.addEventListener('storage', syncFromStorage)
-    return () => window.removeEventListener('storage', syncFromStorage)
+    window.addEventListener(APP_DATA_UPDATED_EVENT, syncFromStorage)
+    return () => {
+      window.removeEventListener('storage', syncFromStorage)
+      window.removeEventListener(APP_DATA_UPDATED_EVENT, syncFromStorage)
+    }
   }, [])
 
   return (

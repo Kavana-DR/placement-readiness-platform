@@ -1,5 +1,6 @@
 // Hook to manage resume data with localStorage persistence
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { dispatchAppDataUpdated } from '../../../src/utils/appEvents'
 
 const STORAGE_KEY = 'resumeBuilderData'
 
@@ -102,30 +103,26 @@ function isStoredSampleData(parsedData = {}) {
   )
 }
 
-export function useResumeData() {
-  const [formData, setFormData] = useState(defaultFormData)
-  const [isLoaded, setIsLoaded] = useState(false)
+function getInitialFormData() {
+  const savedData = localStorage.getItem(STORAGE_KEY)
+  if (!savedData) return defaultFormData
 
-  // Load data from localStorage on mount
-  useEffect(() => {
-    const savedData = localStorage.getItem(STORAGE_KEY)
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData)
-        // Avoid auto-hydrating prefilled sample data; keep fresh form until user clicks load sample.
-        if (isStoredSampleData(parsedData)) {
-          localStorage.removeItem(STORAGE_KEY)
-          setFormData(defaultFormData)
-        } else {
-          setFormData(normalizeFormData(parsedData))
-        }
-      } catch (error) {
-        console.error('Failed to parse saved data:', error)
-        setFormData(defaultFormData)
-      }
+  try {
+    const parsedData = JSON.parse(savedData)
+    if (isStoredSampleData(parsedData)) {
+      localStorage.removeItem(STORAGE_KEY)
+      return defaultFormData
     }
-    setIsLoaded(true)
-  }, [])
+    return normalizeFormData(parsedData)
+  } catch (error) {
+    console.error('Failed to parse saved data:', error)
+    return defaultFormData
+  }
+}
+
+export function useResumeData() {
+  const [formData, setFormData] = useState(() => getInitialFormData())
+  const isLoaded = true
 
   // Save data to localStorage whenever it changes
   const updateFormData = (newDataOrUpdater) => {
@@ -137,6 +134,7 @@ export function useResumeData() {
 
       const normalized = normalizeFormData(resolvedData)
       localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized))
+      dispatchAppDataUpdated({ scope: 'resume-form', key: STORAGE_KEY, action: 'save' })
       return normalized
     })
   }
@@ -144,6 +142,7 @@ export function useResumeData() {
   const clearData = () => {
     setFormData(defaultFormData)
     localStorage.removeItem(STORAGE_KEY)
+    dispatchAppDataUpdated({ scope: 'resume-form', key: STORAGE_KEY, action: 'clear' })
   }
 
   return {

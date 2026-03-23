@@ -8,6 +8,7 @@ import {
   getStoredApplications,
   saveInternshipApplication,
 } from '../../utils/internshipRecommendations'
+import { APP_DATA_UPDATED_EVENT } from '../../utils/appEvents'
 
 export default function RecommendedInternships() {
   const navigate = useNavigate()
@@ -21,7 +22,11 @@ export default function RecommendedInternships() {
     }
 
     window.addEventListener('storage', syncFromStorage)
-    return () => window.removeEventListener('storage', syncFromStorage)
+    window.addEventListener(APP_DATA_UPDATED_EVENT, syncFromStorage)
+    return () => {
+      window.removeEventListener('storage', syncFromStorage)
+      window.removeEventListener(APP_DATA_UPDATED_EVENT, syncFromStorage)
+    }
   }, [])
 
   const recommendations = React.useMemo(

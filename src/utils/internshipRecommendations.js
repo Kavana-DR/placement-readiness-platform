@@ -1,3 +1,5 @@
+import { dispatchAppDataUpdated } from './appEvents'
+
 export const PARSED_RESUME_STORAGE_KEY = 'resumeBuilderParsedData'
 export const INTERNSHIP_APPLICATIONS_STORAGE_KEY = 'internshipApplications'
 
@@ -83,5 +85,6 @@ export function saveInternshipApplication(job, storage = localStorage) {
   ]
 
   storage.setItem(INTERNSHIP_APPLICATIONS_STORAGE_KEY, JSON.stringify(next))
+  dispatchAppDataUpdated({ scope: 'applications', key: INTERNSHIP_APPLICATIONS_STORAGE_KEY, action: 'save' })
   return next
 }

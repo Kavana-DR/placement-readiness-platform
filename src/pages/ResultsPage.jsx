@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Card from '../design-system/components/Card'
 import Button from '../design-system/components/Button'
@@ -12,25 +12,18 @@ import { Download, Copy, Trash2 } from 'lucide-react'
 export default function ResultsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [entry, setEntry] = useState(() => id ? getEntryById(id) : null)
+  const [entry] = useState(() => id ? getEntryById(id) : null)
   const [tab, setTab] = useState('overview')
   const [skillConfidence, setSkillConfidence] = useState(() => entry?.skillConfidenceMap || {})
-  const [finalScore, setFinalScore] = useState(entry?.finalScore || entry?.readinessScore || 0)
-
-  // Calculate final score based on skill confidence
-  useEffect(() => {
-    if (!entry) return
-
-    const baseScore = entry.baseScore || entry.readinessScore || 0
-    const newFinalScore = calculateFinalScore(baseScore, skillConfidence)
-    setFinalScore(newFinalScore)
-  }, [skillConfidence, entry])
+  const finalScore = useMemo(() => {
+    const baseScore = entry?.baseScore || entry?.readinessScore || 0
+    return calculateFinalScore(baseScore, skillConfidence)
+  }, [entry, skillConfidence])
 
   const handleSkillToggle = (skill, newConfidence) => {
     const updated = { ...skillConfidence, [skill]: newConfidence }
     setSkillConfidence(updated)
 
-    // Save to history with updated finalScore
     if (id) {
       const baseScore = entry.baseScore || entry.readinessScore || 0
       const newFinalScore = calculateFinalScore(baseScore, updated)
@@ -67,9 +60,8 @@ export default function ResultsPage() {
     testing: 'Testing'
   }
 
-  // Get weak skills (marked as "practice")
   const weakSkills = Object.entries(skillConfidence)
-    .filter(([_, conf]) => conf === 'practice')
+    .filter(([, conf]) => conf === 'practice')
     .map(([skill]) => skill)
     .slice(0, 3)
 
@@ -91,8 +83,7 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* Score Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card>
           <div className="text-center">
             <div className="text-3xl font-bold text-primary">{finalScore}</div>
@@ -111,29 +102,28 @@ export default function ResultsPage() {
         </Card>
         <Card>
           <div className="text-center">
-            <div className="text-2xl font-bold">{entry.checklist.length}</div>
+            <div className="text-2xl font-bold">{(entry.checklist || []).length}</div>
             <div className="text-sm text-gray-600">Rounds</div>
           </div>
         </Card>
         <Card>
           <div className="text-center">
-            <div className="text-2xl font-bold">{entry.questions.length}</div>
+            <div className="text-2xl font-bold">{(entry.questions || []).length}</div>
             <div className="text-sm text-gray-600">Interview Q's</div>
           </div>
         </Card>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-4 mb-6 border-b">
+      <div className="flex gap-4 mb-6 border-b overflow-x-auto">
         {['overview', 'intel', 'rounds', 'checklist', 'plan', 'questions'].map(t => (
           <button
             key={t}
-            className={`px-4 py-2 font-medium text-sm ${tab === t ? 'border-b-2 border-primary text-primary' : 'text-gray-600'}`}
+            className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${tab === t ? 'border-b-2 border-primary text-primary' : 'text-gray-600'}`}
             onClick={() => setTab(t)}
           >
             {t === 'overview' && 'Skills'}
-            {t === 'intel' && '🏢 Company Intel'}
-            {t === 'rounds' && '📌 Interview Rounds'}
+            {t === 'intel' && 'Company Intel'}
+            {t === 'rounds' && 'Interview Rounds'}
             {t === 'checklist' && 'Checklist'}
             {t === 'plan' && '7-Day Plan'}
             {t === 'questions' && 'Interview Qs'}
@@ -141,100 +131,96 @@ export default function ResultsPage() {
         ))}
       </div>
 
-      {/* Tab Content */}
       {tab === 'overview' && (
         <div className="space-y-4 max-w-6xl">
           <Card>
-            <h3 className="font-semibold mb-4">Extracted Skills — Mark your confidence level</h3>
-            <p className="text-xs text-gray-500 mb-4">Hover over each skill to mark confidence. Your score updates in real-time.</p>
+            <h3 className="font-semibold mb-4">Extracted Skills - Mark your confidence level</h3>
+            <p className="text-xs text-gray-500 mb-4">Choose a confidence level for each skill. Your score updates in real-time.</p>
             <div className="space-y-4">
               {Object.entries(skillCategories).map(([key, label]) => {
-                const keywords = entry.extractedSkills[key] || []
+                const keywords = entry.extractedSkills?.[key] || []
                 return (
-                <div key={key}>
-                  <div className="font-medium text-sm text-primary mb-2">{label}</div>
-                  <div className="flex flex-wrap gap-3">
-                    {keywords.filter(kw => kw).map(kw => {
-                      const confidence = skillConfidence[kw] || 'unknown'
-                      const isKnow = confidence === 'know'
-                      const isPractice = confidence === 'practice'
+                  <div key={key}>
+                    <div className="font-medium text-sm text-primary mb-2">{label}</div>
+                    <div className="flex flex-wrap gap-3">
+                      {keywords.filter(kw => kw).map(kw => {
+                        const confidence = skillConfidence[kw] || 'unknown'
+                        const isKnow = confidence === 'know'
+                        const isPractice = confidence === 'practice'
 
-                      return (
-                        <div
-                          key={kw}
-                          className="relative group"
-                        >
-                          <span
-                            className={`px-3 py-2 rounded-full text-xs font-medium cursor-pointer transition-all ${
-                              isKnow
-                                ? 'bg-green-200 text-green-800'
-                                : isPractice
-                                ? 'bg-amber-200 text-amber-800'
-                                : 'bg-indigo-100 text-indigo-700'
-                            }`}
-                          >
-                            {kw}
-                          </span>
-
-                          {/* Floating toggle menu */}
-                          <div className="hidden group-hover:block absolute bottom-full mb-2 bg-white border border-gray-200 rounded-md shadow-lg z-50 whitespace-nowrap">
-                            <button
-                              onClick={() => handleSkillToggle(kw, 'know')}
-                              className={`block w-full text-left px-3 py-2 text-sm hover:bg-green-50 ${isKnow ? 'bg-green-100 font-semibold' : ''}`}
+                        return (
+                          <div key={kw} className="border border-gray-200 rounded-lg p-2 bg-white">
+                            <span
+                              className={`px-3 py-2 rounded-full text-xs font-medium transition-all ${
+                                isKnow
+                                  ? 'bg-green-200 text-green-800'
+                                  : isPractice
+                                  ? 'bg-amber-200 text-amber-800'
+                                  : 'bg-indigo-100 text-indigo-700'
+                              }`}
                             >
-                              ✓ I know this
-                            </button>
-                            <button
-                              onClick={() => handleSkillToggle(kw, 'practice')}
-                              className={`block w-full text-left px-3 py-2 text-sm hover:bg-amber-50 border-t ${isPractice ? 'bg-amber-100 font-semibold' : ''}`}
-                            >
-                              ⟳ Need practice
-                            </button>
-                            <button
-                              onClick={() => handleSkillToggle(kw, 'unknown')}
-                              className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 border-t ${confidence === 'unknown' ? 'bg-gray-100 font-semibold' : ''}`}
-                            >
-                              ? Unsure
-                            </button>
+                              {kw}
+                            </span>
+                            <div className="mt-2 flex gap-1">
+                              <button
+                                type="button"
+                                onClick={() => handleSkillToggle(kw, 'know')}
+                                className={`px-2 py-1 rounded text-xs border ${isKnow ? 'bg-green-100 border-green-300 text-green-800' : 'bg-white border-gray-300 text-gray-700'}`}
+                              >
+                                Know
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleSkillToggle(kw, 'practice')}
+                                className={`px-2 py-1 rounded text-xs border ${isPractice ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-white border-gray-300 text-gray-700'}`}
+                              >
+                                Practice
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleSkillToggle(kw, 'unknown')}
+                                className={`px-2 py-1 rounded text-xs border ${confidence === 'unknown' ? 'bg-gray-100 border-gray-300 text-gray-800' : 'bg-white border-gray-300 text-gray-700'}`}
+                              >
+                                Unsure
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
                 )
               })}
             </div>
 
-            {/* Export Buttons */}
             <div className="mt-8 pt-6 border-t space-y-3">
               <h4 className="font-medium text-sm mb-3">Export</h4>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Button
                   variant="secondary"
                   size="small"
-                  onClick={() => copyToClipboard(format7DayPlan(entry.plan))}
+                  onClick={() => copyToClipboard(format7DayPlan(entry.plan || []))}
                 >
                   <Copy size={14} className="mr-1" /> Copy 7-Day Plan
                 </Button>
                 <Button
                   variant="secondary"
                   size="small"
-                  onClick={() => copyToClipboard(formatChecklist(entry.checklist))}
+                  onClick={() => copyToClipboard(formatChecklist(entry.checklist || []))}
                 >
                   <Copy size={14} className="mr-1" /> Copy Checklist
                 </Button>
                 <Button
                   variant="secondary"
                   size="small"
-                  onClick={() => copyToClipboard(formatQuestions(entry.questions))}
+                  onClick={() => copyToClipboard(formatQuestions(entry.questions || []))}
                 >
                   <Copy size={14} className="mr-1" /> Copy Questions
                 </Button>
                 <Button
                   variant="primary"
                   size="small"
-                  onClick={() => downloadAsFile(formatCompleteExport(entry), `${entry.company}-analysis.txt`)}
+                  onClick={() => downloadAsFile(formatCompleteExport(entry), `${(entry.company || 'analysis').replace(/[^a-z0-9-_]/gi, '_')}-analysis.txt`)}
                 >
                   <Download size={14} className="mr-1" /> Download All
                 </Button>
@@ -252,17 +238,17 @@ export default function ResultsPage() {
 
       {tab === 'rounds' && (
         <div className="max-w-6xl">
-          <RoundMappingTimeline rounds={entry.roundMapping} />
+          <RoundMappingTimeline rounds={entry.roundMapping || []} />
         </div>
       )}
 
       {tab === 'checklist' && (
         <div className="space-y-4 max-w-6xl">
-          {entry.checklist.map(round => (
+          {(entry.checklist || []).map(round => (
             <Card key={round.round}>
               <h3 className="font-semibold mb-2">Round {round.round}: {round.title}</h3>
               <ul className="space-y-2">
-                {round.items.map((item, i) => (
+                {(round.items || []).map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm">
                     <input type="checkbox" className="mt-1" />
                     <span>{item}</span>
@@ -276,14 +262,14 @@ export default function ResultsPage() {
 
       {tab === 'plan' && (
         <div className="space-y-4 max-w-6xl">
-          {entry.plan.map(day => (
+          {(entry.plan || []).map(day => (
             <Card key={day.day}>
               <h3 className="font-semibold mb-1">Day {day.day}: {day.title}</h3>
               <p className="text-xs text-gray-500 mb-2">Focus: {day.focus}</p>
               <ul className="space-y-1">
-                {day.tasks.map((task, i) => (
+                {(day.tasks || []).map((task, i) => (
                   <li key={i} className="text-sm flex gap-2">
-                    <span>•</span> <span>{task}</span>
+                    <span>-</span> <span>{task}</span>
                   </li>
                 ))}
               </ul>
@@ -294,7 +280,7 @@ export default function ResultsPage() {
 
       {tab === 'questions' && (
         <div className="space-y-3 max-w-6xl">
-          {entry.questions.map((q, i) => (
+          {(entry.questions || []).map((q, i) => (
             <Card key={i}>
               <div className="flex gap-3">
                 <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center flex-shrink-0">
@@ -307,12 +293,11 @@ export default function ResultsPage() {
         </div>
       )}
 
-      {/* Action Next */}
       {weakSkills.length > 0 && (
         <div className="mt-12 max-w-6xl">
           <Card className="bg-blue-50 border border-blue-200">
             <div>
-              <h3 className="font-semibold text-lg mb-3">📌 Next Action</h3>
+              <h3 className="font-semibold text-lg mb-3">Next Action</h3>
               <p className="text-sm text-gray-700 mb-4">
                 Focus on these weak areas first:
               </p>
@@ -324,7 +309,7 @@ export default function ResultsPage() {
                 ))}
               </div>
               <p className="text-base font-semibold text-primary">
-                💡 Start Day 1 plan now. Master fundamentals before diving into complex topics.
+                Start Day 1 plan now. Master fundamentals before diving into complex topics.
               </p>
             </div>
           </Card>

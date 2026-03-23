@@ -1,4 +1,5 @@
-import { normalizeEntry, validateEntrySchema, safeGetEntry } from './entrySchema'
+import { normalizeEntry, safeGetEntry } from './entrySchema'
+import { dispatchAppDataUpdated } from './appEvents'
 
 const HISTORY_KEY = 'placement_history'
 let loadError = null
@@ -64,6 +65,7 @@ export function saveEntry(entry) {
 
     history.unshift(normalized) // newest first
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
+    dispatchAppDataUpdated({ scope: 'history', key: HISTORY_KEY, action: 'save' })
     return normalized.id
   } catch (e) {
     console.error('Error saving entry:', e)
@@ -106,6 +108,7 @@ export function updateEntry(id, updates) {
 
     history[index] = normalized
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
+    dispatchAppDataUpdated({ scope: 'history', key: HISTORY_KEY, action: 'update' })
     return normalized
   } catch (e) {
     console.error('Error updating entry:', e)
@@ -118,6 +121,7 @@ export function deleteEntry(id) {
     const history = getHistory()
     const filtered = history.filter(e => e.id !== id)
     localStorage.setItem(HISTORY_KEY, JSON.stringify(filtered))
+    dispatchAppDataUpdated({ scope: 'history', key: HISTORY_KEY, action: 'delete' })
   } catch (e) {
     console.error('Error deleting entry:', e)
   }
@@ -127,6 +131,7 @@ export function clearHistory() {
   try {
     localStorage.removeItem(HISTORY_KEY)
     clearLoadError()
+    dispatchAppDataUpdated({ scope: 'history', key: HISTORY_KEY, action: 'clear' })
   } catch (e) {
     console.error('Error clearing history:', e)
   }

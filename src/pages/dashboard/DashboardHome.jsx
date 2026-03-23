@@ -3,22 +3,36 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Responsi
 import { useNavigate } from 'react-router-dom'
 import Card from '../../../src/design-system/components/Card'
 import JobRecommendations from '../../components/JobRecommendations'
+import { useDashboardMetrics } from '../../hooks/useDashboardMetrics'
 
-const readinessValue = 72
+function DashboardSkeleton() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-pulse">
+      <div className="space-y-8">
+        <div className="h-56 bg-white rounded-xl border border-gray-200" />
+        <div className="h-48 bg-white rounded-xl border border-gray-200" />
+      </div>
+      <div className="space-y-8">
+        <div className="h-56 bg-white rounded-xl border border-gray-200" />
+        <div className="h-48 bg-white rounded-xl border border-gray-200" />
+      </div>
+    </div>
+  )
+}
 
-function ReadinessCircle({ value = readinessValue }){
+function ReadinessCircle({ value = 0, label = 'Readiness Score' }) {
   const size = 180
   const stroke = 12
   const radius = (size - stroke) / 2
   const circumference = 2 * Math.PI * radius
-  const dash = (value / 100) * circumference
+  const normalized = Math.max(0, Math.min(100, value))
+  const dash = (normalized / 100) * circumference
 
   return (
     <Card>
       <div className="flex flex-col items-center">
         <svg width={size} height={size} className="mb-4">
-          <defs />
-          <g transform={`translate(${size/2}, ${size/2})`}>
+          <g transform={`translate(${size / 2}, ${size / 2})`}>
             <circle r={radius} stroke="#eee" strokeWidth={stroke} fill="none" />
             <circle
               r={radius}
@@ -31,22 +45,14 @@ function ReadinessCircle({ value = readinessValue }){
             />
           </g>
         </svg>
-        <div className="text-3xl font-semibold">{value}</div>
-        <div className="text-sm text-gray-600">Readiness Score</div>
+        <div className="text-3xl font-semibold transition-all duration-500">{normalized}</div>
+        <div className="text-sm text-gray-600">{label}</div>
       </div>
     </Card>
   )
 }
 
-function SkillRadar(){
-  const data = [
-    { subject: 'DSA', A: 75, fullMark: 100 },
-    { subject: 'System Design', A: 60, fullMark: 100 },
-    { subject: 'Communication', A: 80, fullMark: 100 },
-    { subject: 'Resume', A: 85, fullMark: 100 },
-    { subject: 'Aptitude', A: 70, fullMark: 100 },
-  ]
-
+function SkillRadar({ data }) {
   return (
     <Card>
       <div style={{ height: 260 }}>
@@ -54,8 +60,8 @@ function SkillRadar(){
           <RadarChart data={data} cx="50%" cy="50%" outerRadius="80%">
             <PolarGrid />
             <PolarAngleAxis dataKey="subject" />
-            <PolarRadiusAxis angle={30} domain={[0,100]} />
-            <Radar name="You" dataKey="A" stroke="#6366F1" fill="#6366F1" fillOpacity={0.6} />
+            <PolarRadiusAxis angle={30} domain={[0, 100]} />
+            <Radar name="Current" dataKey="score" stroke="#6366F1" fill="#6366F1" fillOpacity={0.6} />
           </RadarChart>
         </ResponsiveContainer>
       </div>
@@ -63,46 +69,46 @@ function SkillRadar(){
   )
 }
 
-function ContinuePractice(){
-  const completed = 3
-  const total = 10
-  const pct = Math.round((completed/total)*100)
-
+function ContinuePractice({ completed, total, pct, lastTopic, onContinue }) {
   return (
     <Card>
       <div>
         <h3 className="text-lg font-semibold mb-2">Continue Practice</h3>
-        <div className="text-sm text-gray-600 mb-2">Last topic: Dynamic Programming</div>
-        <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-          <div className="bg-primary h-3 rounded-full" style={{ width: `${pct}%` }} />
+        <div className="text-sm text-gray-600 mb-2">Last topic: {lastTopic || 'Not started'}</div>
+        <div className="w-full bg-gray-200 rounded-full h-3 mb-3 overflow-hidden">
+          <div className="bg-primary h-3 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
         </div>
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600">{completed}/{total} completed</div>
-          <button className="bg-primary text-white px-3 py-1 rounded-md">Continue</button>
+          <button type="button" className="bg-primary text-white px-3 py-1 rounded-md" onClick={onContinue}>
+            Continue
+          </button>
         </div>
       </div>
     </Card>
   )
 }
 
-function WeeklyGoals(){
-  const solved = 12
-  const target = 20
-  const pct = Math.round((solved/target)*100)
-  const days = [true, true, true, false, true, false, false] // Mon-Sun activity
+function WeeklyGoals({ solved, target, pct, days }) {
+  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
   return (
     <Card>
       <div>
         <h3 className="text-lg font-semibold mb-2">Weekly Goals</h3>
         <div className="text-sm text-gray-600 mb-2">Problems Solved: {solved}/{target} this week</div>
-        <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-          <div className="bg-primary h-3 rounded-full" style={{ width: `${pct}%` }} />
+        <div className="w-full bg-gray-200 rounded-full h-3 mb-4 overflow-hidden">
+          <div className="bg-primary h-3 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
         </div>
 
-        <div className="flex items-center gap-3">
-          {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=> (
-            <div key={d} className={`w-8 h-8 rounded-full flex items-center justify-center ${days[i] ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>{d.slice(0,1)}</div>
+        <div className="flex items-center gap-3 flex-wrap">
+          {dayLabels.map((d, i) => (
+            <div
+              key={d}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-500 ${days[i] ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}
+            >
+              {d.slice(0, 1)}
+            </div>
           ))}
         </div>
       </div>
@@ -110,55 +116,99 @@ function WeeklyGoals(){
   )
 }
 
-function UpcomingAssessments(){
-  const items = [
-    { title: 'DSA Mock Test', time: 'Tomorrow, 10:00 AM' },
-    { title: 'System Design Review', time: 'Wed, 2:00 PM' },
-    { title: 'HR Interview Prep', time: 'Friday, 11:00 AM' },
-  ]
-
+function DashboardStats({ atsScore, extractedSkillsCount, applicationsCount }) {
   return (
-    <Card>
-      <div>
-        <h3 className="text-lg font-semibold mb-3">Upcoming Assessments</h3>
-        <ul className="space-y-3">
-          {items.map(it=> (
-            <li key={it.title} className="flex items-start justify-between">
-              <div>
-                <div className="font-medium">{it.title}</div>
-                <div className="text-sm text-gray-600">{it.time}</div>
-              </div>
-              <div className="text-sm text-gray-500">&gt;</div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </Card>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <Card>
+        <div className="text-center">
+          <p className="text-xs text-gray-500">ATS Score</p>
+          <p className="text-2xl font-semibold transition-all duration-500">{atsScore}</p>
+        </div>
+      </Card>
+      <Card>
+        <div className="text-center">
+          <p className="text-xs text-gray-500">Extracted Skills</p>
+          <p className="text-2xl font-semibold transition-all duration-500">{extractedSkillsCount}</p>
+        </div>
+      </Card>
+      <Card>
+        <div className="text-center">
+          <p className="text-xs text-gray-500">Applications</p>
+          <p className="text-2xl font-semibold transition-all duration-500">{applicationsCount}</p>
+        </div>
+      </Card>
+    </div>
   )
 }
 
-export default function DashboardHome(){
+export default function DashboardHome() {
   const navigate = useNavigate()
+  const {
+    readinessScore,
+    atsScore,
+    extractedSkillsCount,
+    applicationsCount,
+    practice,
+    practicePercent,
+    weeklyGoalPercent,
+    skillRadarData,
+    lastUpdatedAt,
+    isLoading,
+    error,
+  } = useDashboardMetrics()
+
+  const formattedUpdatedAt = React.useMemo(() => {
+    if (!lastUpdatedAt) return 'Not available'
+    return new Date(lastUpdatedAt).toLocaleString()
+  }, [lastUpdatedAt])
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
-      <h2 className="text-3xl font-semibold mb-8">Dashboard</h2>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-8">
-          <ReadinessCircle />
-          <ContinuePractice />
-        </div>
-
-        <div className="space-y-8">
-          <SkillRadar />
-          <WeeklyGoals />
-        </div>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-semibold">Dashboard</h2>
+        <div className="text-sm text-gray-500">Last updated: {formattedUpdatedAt}</div>
       </div>
 
-      <div className="mt-8">
-        <UpcomingAssessments />
+      {error && (
+        <Card>
+          <div className="text-sm text-red-700">Unable to load some dashboard data. Showing last known values.</div>
+        </Card>
+      )}
+
+      <div className="mb-6">
+        <DashboardStats
+          atsScore={atsScore || 0}
+          extractedSkillsCount={extractedSkillsCount || 0}
+          applicationsCount={applicationsCount || 0}
+        />
       </div>
+
+      {isLoading ? (
+        <DashboardSkeleton />
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-8">
+            <ReadinessCircle value={readinessScore || 0} />
+            <ContinuePractice
+              completed={practice.completed || 0}
+              total={practice.total || 10}
+              pct={practicePercent || 0}
+              lastTopic={practice.lastTopic || 'Not started'}
+              onContinue={() => navigate('/dashboard/practice')}
+            />
+          </div>
+
+          <div className="space-y-8">
+            <SkillRadar data={skillRadarData || []} />
+            <WeeklyGoals
+              solved={practice.weeklySolved || 0}
+              target={practice.weeklyTarget || 20}
+              pct={weeklyGoalPercent || 0}
+              days={practice.activity || [false, false, false, false, false, false, false]}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="mt-8">
         <Card>
@@ -170,7 +220,7 @@ export default function DashboardHome(){
             <button
               type="button"
               className="bg-primary text-white px-4 py-2 rounded-md"
-              onClick={() => navigate('/resume-builder')}
+              onClick={() => navigate('/resume-builder/builder')}
             >
               Open Module
             </button>

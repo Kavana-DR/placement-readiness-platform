@@ -1,5 +1,6 @@
 import * as mammoth from 'mammoth'
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
+import { dispatchAppDataUpdated } from '../../../src/utils/appEvents'
 
 // Prefer an explicit module worker in Vite to avoid fake-worker loading errors.
 try {
@@ -12,13 +13,23 @@ try {
 }
 
 export const PARSED_RESUME_STORAGE_KEY = 'resumeBuilderParsedData'
+const MAX_RESUME_FILE_SIZE_BYTES = 5 * 1024 * 1024
+const MIN_EXTRACTED_TEXT_LENGTH = 40
 
 const SECTION_ALIASES = {
   skills: ['skills', 'technical skills', 'core skills', 'technologies'],
   education: ['education', 'academic background', 'academics'],
   experience: ['experience', 'work experience', 'employment history', 'professional experience'],
-  projects: ['projects', 'project experience', 'personal projects'],
-  certifications: ['certifications', 'certificates', 'licenses'],
+  projects: ['projects', 'project experience', 'personal projects', 'academic projects'],
+  certifications: [
+    'certifications',
+    'certification',
+    'certificates',
+    'licenses',
+    'courses',
+    'coursework',
+    'certifications and courses',
+  ],
   achievements: ['achievements', 'accomplishments', 'awards'],
 }
 
@@ -79,7 +90,10 @@ function normalizeText(rawText = '') {
 }
 
 function extractEmail(text = '') {
-  const match = text.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/)
+  const normalized = text
+    .replace(/\s*@\s*/g, '@')
+    .replace(/\s*\.\s*/g, '.')
+  const match = normalized.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/)
   return match ? match[0] : ''
 }
 
@@ -95,12 +109,14 @@ function normalizeUrl(url = '') {
 }
 
 function extractGithub(text = '') {
-  const match = text.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/[A-Za-z0-9._-]+/i)
+  const normalized = text.replace(/\s*([./])\s*/g, '$1')
+  const match = normalized.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/[A-Za-z0-9._-]+/i)
   return match ? normalizeUrl(match[0]) : ''
 }
 
 function extractLinkedIn(text = '') {
-  const match = text.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+/i)
+  const normalized = text.replace(/\s*([./])\s*/g, '$1')
+  const match = normalized.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/(?:in\/)?[A-Za-z0-9_-]+/i)
   return match ? normalizeUrl(match[0]) : ''
 }
 
@@ -115,6 +131,7 @@ function isPotentialNameLine(line = '') {
   if (!line) return false
   if (/@/.test(line)) return false
   if (/\d/.test(line)) return false
+  if (isLikelyNonNameLine(line)) return false
 
   const cleaned = wordsOnlyLine(line)
   if (!cleaned) return false
@@ -125,15 +142,43 @@ function isPotentialNameLine(line = '') {
   return words.every((word) => /^[A-Za-z][A-Za-z'-]*$/.test(word))
 }
 
-function detectName(lines = []) {
+function isLikelyNonNameLine(line = '') {
+  return /\b(affiliated|ongoing|current|cgpa|gpa|education|college|university|pre-university|department|dept|board)\b/i.test(line)
+}
+
+function titleCase(value = '') {
+  return value
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
+
+function fallbackNameFromEmail(email = '') {
+  const localPart = String(email || '').split('@')[0] || ''
+  const words = localPart
+    .replace(/[0-9]+/g, ' ')
+    .split(/[._-]+/)
+    .map((word) => word.trim())
+    .filter((word) => word.length >= 2)
+
+  if (words.length === 0) return ''
+  return titleCase(words.slice(0, 3).join(' '))
+}
+
+function detectName(lines = [], email = '') {
   const topLines = lines.slice(0, 12)
   for (const rawLine of topLines) {
     const line = normalizeLine(rawLine)
     if (!line) continue
     if (isHeadingLine(line)) continue
     if (isPotentialNameLine(line)) return wordsOnlyLine(line)
+
+    // Resume headers often place name and contact on one line: "Name | email | phone".
+    const firstFragment = line.split(/[|•]/)[0]?.trim() || ''
+    if (isPotentialNameLine(firstFragment)) return wordsOnlyLine(firstFragment)
   }
-  return ''
+  return fallbackNameFromEmail(email)
 }
 
 function canonicalizeHeading(line = '') {
@@ -148,7 +193,14 @@ function canonicalizeHeading(line = '') {
 function resolveHeadingKey(line = '') {
   const normalized = canonicalizeHeading(line)
   for (const [key, aliases] of Object.entries(SECTION_ALIASES)) {
-    if (aliases.some((alias) => normalized === alias)) {
+    if (
+      aliases.some((alias) =>
+        normalized === alias ||
+        normalized.startsWith(`${alias} `) ||
+        normalized.includes(` ${alias} `) ||
+        normalized.endsWith(` ${alias}`),
+      )
+    ) {
       return key
     }
   }
@@ -211,6 +263,15 @@ function mergeEducationLines(lines = []) {
   for (const current of lines) {
     if (
       merged.length > 0 &&
+      isEducationContinuationLine(current) &&
+      merged[merged.length - 1].length < 180
+    ) {
+      merged[merged.length - 1] = `${merged[merged.length - 1]} | ${current}`
+      continue
+    }
+
+    if (
+      merged.length > 0 &&
       isLikelyDateLine(current) &&
       !isLikelyDateLine(merged[merged.length - 1]) &&
       merged[merged.length - 1].length < 140
@@ -221,6 +282,10 @@ function mergeEducationLines(lines = []) {
     }
   }
   return merged
+}
+
+function isEducationContinuationLine(line = '') {
+  return /\b(affiliated|ongoing|current|cgpa|gpa|percentage|dept|department|board|university|college)\b/i.test(line)
 }
 
 function extractSkillsFromText(text = '') {
@@ -250,30 +315,94 @@ function normalizeProjectEntries(lines = []) {
         const candidate = withoutBullet.split(/\s[-|:]\s/)[0].trim()
         const words = candidate.split(' ').filter(Boolean)
         if (words.length < 2 || words.length > 12) return ''
+        if (isLikelyCertificationLine(candidate)) return ''
+        if (isLikelyProjectDescriptionLine(candidate)) return ''
         return candidate
       })
       .filter(Boolean),
   )
 }
 
+function isLikelyCertificationLine(line = '') {
+  return /\b(coursera|udemy|nptel|certificate|certification|course|learn quest|offered through)\b/i.test(line)
+}
+
+function isLikelyProjectDescriptionLine(line = '') {
+  const actionStartPattern =
+    /^(applied|achieved|built|created|designed|developed|deployed|implemented|improved|optimized|integrated|reduced|increased|trained|used|worked)\b/i
+  return actionStartPattern.test(line)
+}
+
+function isLikelyExperienceLine(line = '') {
+  if (!line) return false
+  if (isHeadingLine(line)) return false
+  if (isLikelyEducationLine(line)) return false
+  if (isLikelyCertificationLine(line)) return false
+  if (isLikelyProjectTitleLine(line)) return false
+  return isLikelyProjectDescriptionLine(line) || /\b(intern|experience|worked as|responsible for)\b/i.test(line)
+}
+
+function isLikelyEducationLine(line = '') {
+  return /\b(university|college|school|cgpa|gpa|b\.?e|btech|12th|10th|pre-university|pu college|kseeb|vtu)\b/i.test(line)
+}
+
+function isLikelyProjectTitleLine(line = '') {
+  if (!line) return false
+  if (isHeadingLine(line)) return false
+  if (isLikelyCertificationLine(line)) return false
+  if (isLikelyProjectDescriptionLine(line)) return false
+  if (isLikelyEducationLine(line)) return false
+  if (/@/.test(line)) return false
+  if (/\b(cgpa|gpa|affiliated|ongoing)\b/i.test(line)) return false
+
+  const words = line.split(' ').filter(Boolean)
+  if (words.length < 2 || words.length > 10) return false
+
+  return /\b(app|project|system|tracker|detection|portal|management)\b/i.test(line)
+}
+
+function buildAutoSummary(skills = [], projects = [], experience = []) {
+  const topSkills = (skills || []).slice(0, 4).join(', ')
+  const projectCount = (projects || []).length
+  const expCount = (experience || []).length
+
+  if (!topSkills && projectCount === 0 && expCount === 0) return ''
+  if (!topSkills) return `Built ${projectCount} projects and documented ${expCount} key experience highlights.`
+  return `Aspiring software engineer with skills in ${topSkills}. Built ${projectCount} projects and documented ${expCount} practical experience highlights.`
+}
+
 function buildParsedObject(text = '', sections = {}, lines = []) {
+  const allCleanedLines = cleanupSectionLines(lines)
   const skillsText = cleanupSectionLines(sections.skills).join(' ')
   const globalText = [skillsText, text].join(' ')
 
   const skills = extractSkillsFromText(globalText)
-  const education = mergeEducationLines(cleanupSectionLines(sections.education))
-  const experience = cleanupSectionLines(sections.experience)
-  const projectSectionLines = cleanupSectionLines(sections.projects)
+  let education = mergeEducationLines(cleanupSectionLines(sections.education))
+  if (education.length === 0) {
+    education = mergeEducationLines(allCleanedLines.filter((line) => isLikelyEducationLine(line))).slice(0, 5)
+  }
+
+  let experience = cleanupSectionLines(sections.experience)
+  if (experience.length === 0) {
+    experience = allCleanedLines.filter((line) => isLikelyExperienceLine(line)).slice(0, 6)
+  }
+  let projectSectionLines = cleanupSectionLines(sections.projects)
+  if (projectSectionLines.length === 0) {
+    projectSectionLines = allCleanedLines.filter((line) => isLikelyProjectTitleLine(line))
+  }
   const projects = normalizeProjectEntries(projectSectionLines)
   const projectTechStack = extractProjectTechStack(projectSectionLines)
   const mergedSkills = unique([...skills, ...projectTechStack])
+  const email = extractEmail(text)
+  const summary = buildAutoSummary(mergedSkills, projects, experience)
 
   return {
-    name: detectName(lines),
-    email: extractEmail(text),
+    name: detectName(lines, email),
+    email,
     phone: extractPhone(text),
     github: extractGithub(text),
     linkedin: extractLinkedIn(text),
+    summary,
     skills: mergedSkills,
     education,
     experience,
@@ -345,17 +474,35 @@ async function extractTextFromDocx(file) {
 }
 
 export async function parseResumeFile(file) {
-  if (!file) throw new Error('Please choose a file to upload.')
+  if (!file) {
+    throw new Error('Please choose a file to upload.')
+  }
 
-  const extension = file.name.toLowerCase().split('.').pop()
+  if (file.size > MAX_RESUME_FILE_SIZE_BYTES) {
+    throw new Error('File is too large. Please upload a PDF or DOCX under 5 MB.')
+  }
+
+  const extension = String(file.name || '').toLowerCase().split('.').pop()
   let extractedText = ''
 
-  if (extension === 'pdf') {
-    extractedText = await extractTextFromPdf(file)
-  } else if (extension === 'docx') {
-    extractedText = await extractTextFromDocx(file)
-  } else {
-    throw new Error('Unsupported file type. Please upload PDF or DOCX.')
+  try {
+    if (extension === 'pdf') {
+      extractedText = await extractTextFromPdf(file)
+    } else if (extension === 'docx') {
+      extractedText = await extractTextFromDocx(file)
+    } else {
+      throw new Error('Unsupported file type. Please upload PDF or DOCX.')
+    }
+  } catch {
+    throw new Error('Failed to parse this file. Please upload a text-based PDF or DOCX.')
+  }
+
+  const normalizedText = String(extractedText || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  if (normalizedText.length < MIN_EXTRACTED_TEXT_LENGTH) {
+    throw new Error('Could not extract enough text from this file. Please upload a clearer resume document.')
   }
 
   const parsedData = parseResumeText(extractedText)
@@ -365,6 +512,7 @@ export async function parseResumeFile(file) {
 
 export function saveParsedResumeData(parsedData) {
   localStorage.setItem(PARSED_RESUME_STORAGE_KEY, JSON.stringify(parsedData))
+  dispatchAppDataUpdated({ scope: 'resume-parse', key: PARSED_RESUME_STORAGE_KEY, action: 'save' })
 }
 
 export function loadParsedResumeData() {
@@ -379,6 +527,7 @@ export function loadParsedResumeData() {
 
 export function clearParsedResumeData() {
   localStorage.removeItem(PARSED_RESUME_STORAGE_KEY)
+  dispatchAppDataUpdated({ scope: 'resume-parse', key: PARSED_RESUME_STORAGE_KEY, action: 'clear' })
 }
 
 function safeArray(value) {
@@ -395,6 +544,7 @@ export function applyParsedDataToFormData(previousFormData, parsedData) {
   const safeProjects = safeArray(parsedData.projects)
   const mergedTechnicalSkills = unique([...safeSkills, ...safeProjectTechStack])
   const mergedToolSkills = unique([...(previousFormData.skillsByCategory?.tools || []), ...safeProjectTechStack])
+  const parsedSummary = String(parsedData.summary || '').trim()
 
   return {
     ...previousFormData,
@@ -428,6 +578,7 @@ export function applyParsedDataToFormData(previousFormData, parsedData) {
       github: parsedData.github || previousFormData.links.github,
       linkedin: parsedData.linkedin || previousFormData.links.linkedin,
     },
+    summary: parsedSummary || previousFormData.summary,
     skillsByCategory: {
       ...previousFormData.skillsByCategory,
       technical: mergedTechnicalSkills.length > 0 ? mergedTechnicalSkills : previousFormData.skillsByCategory.technical,

@@ -1,4 +1,4 @@
-export function generateChecklist(skillsCategories, isEmpty) {
+export function generateChecklist(skillsCategories = [], isEmpty = false) {
   const rounds = [
     {
       round: 1,
@@ -55,7 +55,6 @@ export function generateChecklist(skillsCategories, isEmpty) {
   ]
 
   if (!isEmpty) {
-    // Adapt checklist based on detected skills
     if (skillsCategories.includes('web')) {
       rounds[2].items.push('Frontend frameworks (React, Vue)')
       rounds[2].items.push('State management patterns')
@@ -70,10 +69,14 @@ export function generateChecklist(skillsCategories, isEmpty) {
     }
   }
 
+  rounds.forEach((round) => {
+    round.items = [...new Set(round.items)]
+  })
+
   return rounds
 }
 
-export function generate7DayPlan(skillsCategories, isEmpty) {
+export function generate7DayPlan(skillsCategories = [], isEmpty = false) {
   const basePlan = [
     {
       day: 1,
@@ -84,7 +87,7 @@ export function generate7DayPlan(skillsCategories, isEmpty) {
         'Time complexity and Big O notation',
         'OS basics (processes, threads, memory)',
         'DBMS fundamentals (ACID, normalization)',
-        '2–3 easy coding problems'
+        '2-3 easy coding problems'
       ]
     },
     {
@@ -96,31 +99,31 @@ export function generate7DayPlan(skillsCategories, isEmpty) {
         'Networking basics (TCP/IP, DNS)',
         'Database queries and indexing',
         'Revision of Day 1 concepts',
-        '3–4 medium coding problems'
+        '3-4 medium coding problems'
       ]
     },
     {
       day: 3,
-      title: 'DSA Practice – Part 1',
+      title: 'DSA Practice - Part 1',
       focus: 'Arrays and strings',
       tasks: [
         'String manipulation (reverse, palindrome)',
         'Array problems (rotation, rearrangement)',
         'Two-pointer techniques',
         'Sorting and searching optimization',
-        '4–5 medium to hard problems'
+        '4-5 medium to hard problems'
       ]
     },
     {
       day: 4,
-      title: 'DSA Practice – Part 2',
+      title: 'DSA Practice - Part 2',
       focus: 'Trees and graphs',
       tasks: [
         'Binary tree traversals (DFS, BFS)',
         'Graph problems (shortest path, cycle detection)',
         'Backtracking and recursion',
         'Dynamic programming intro',
-        '3–4 hard problems'
+        '3-4 hard problems'
       ]
     },
     {
@@ -128,7 +131,7 @@ export function generate7DayPlan(skillsCategories, isEmpty) {
       title: 'Project & Resume Alignment',
       focus: 'Showcase and prepare',
       tasks: [
-        'Document 2–3 key projects',
+        'Document 2-3 key projects',
         'Align tech stack with JD requirements',
         'Prepare project demo script',
         'Highlight achievements and impact',
@@ -161,7 +164,6 @@ export function generate7DayPlan(skillsCategories, isEmpty) {
     }
   ]
 
-  // Adapt plan based on detected skills
   if (!isEmpty) {
     if (skillsCategories.includes('web')) {
       basePlan[4].tasks.push('Frontend framework project showcase')
@@ -184,18 +186,13 @@ export function generate7DayPlan(skillsCategories, isEmpty) {
   return basePlan
 }
 
-export function generateInterviewQuestions(skillsCategories) {
+export function generateInterviewQuestions(skillsCategories = []) {
   const baseQuestions = [
     'Walk us through your approach to problem-solving.',
     'Tell us about a challenging project and how you overcame it.',
-    'How do you stay updated with the latest tech trends?',
-    'Describe your experience with teamwork and collaboration.',
-    'What are your strengths and areas of improvement?',
     'Why are you interested in this role and company?',
-    'How do you handle tight deadlines and pressure?',
-    'What is your learning style and how do you approach new technologies?',
     'Describe a situation where you had to debug complex code.',
-    'What is your ideal work environment?'
+    'How do you stay updated with the latest tech trends?'
   ]
 
   const skillSpecificQuestions = []
@@ -231,7 +228,16 @@ export function generateInterviewQuestions(skillsCategories) {
     skillSpecificQuestions.push('What are the challenges of testing microservices?')
   }
 
-  // Return top 10 questions: base + skill-specific
-  const allQuestions = [...baseQuestions, ...skillSpecificQuestions]
-  return allQuestions.slice(0, 10)
+  if (skillSpecificQuestions.length === 0) {
+    return [
+      ...baseQuestions,
+      'Describe your experience with teamwork and collaboration.',
+      'What are your strengths and areas of improvement?',
+      'How do you handle tight deadlines and pressure?',
+      'What is your learning style and how do you approach new technologies?',
+      'What is your ideal work environment?'
+    ].slice(0, 10)
+  }
+
+  return [...baseQuestions, ...skillSpecificQuestions].slice(0, 10)
 }

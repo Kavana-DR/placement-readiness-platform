@@ -112,6 +112,24 @@
     margin: 0.6in;
   }
 
+  /* Print only the resume preview surface, not dashboard shell/navigation. */
+  body * {
+    visibility: hidden !important;
+  }
+
+  .preview-container,
+  .preview-container * {
+    visibility: visible !important;
+  }
+
+  .preview-container {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    min-height: auto !important;
+  }
+
   body,
   #root,
   .app {
@@ -125,6 +143,7 @@
   .preview-footer,
   .no-print {
     display: none !important;
+    visibility: hidden !important;
   }
 
   .preview-container,

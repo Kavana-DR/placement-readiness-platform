@@ -7,6 +7,7 @@ import {
   getStoredApplications,
   saveInternshipApplication,
 } from '../utils/internshipRecommendations'
+import { APP_DATA_UPDATED_EVENT } from '../utils/appEvents'
 
 const jobs = [
   {
@@ -59,7 +60,11 @@ export default function JobRecommendations() {
     }
 
     window.addEventListener('storage', syncFromStorage)
-    return () => window.removeEventListener('storage', syncFromStorage)
+    window.addEventListener(APP_DATA_UPDATED_EVENT, syncFromStorage)
+    return () => {
+      window.removeEventListener('storage', syncFromStorage)
+      window.removeEventListener(APP_DATA_UPDATED_EVENT, syncFromStorage)
+    }
   }, [])
 
   const recommendations = React.useMemo(() => getRecommendedInternships(jobs, resumeSkills), [resumeSkills])
